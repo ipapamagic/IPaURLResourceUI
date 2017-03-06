@@ -8,7 +8,7 @@
 
 import Foundation
 
-open class IPaURLMultipartFormData {
+@objc open class IPaURLMultipartFormData:NSObject {
     let boundary:String = ProcessInfo.processInfo.globallyUniqueString
     lazy var data:NSMutableData = NSMutableData()
     open func addStringData(_ string:String,name:String) {

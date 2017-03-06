@@ -8,13 +8,13 @@
 
 import Foundation
 
-class IPaServerAPI :NSObject {
+public class IPaServerAPI :NSObject {
     let resourceUI:IPaURLResourceUI
     var currentAPITask:URLSessionDataTask?
-    init(resourceUI:IPaURLResourceUI) {
+    public init(resourceUI:IPaURLResourceUI) {
         self.resourceUI = resourceUI
     }
-    func apiPerform(_ api:String,method:String,param:[String:AnyObject]?,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) {
+    public func apiPerform(_ api:String,method:String,param:[String:AnyObject]?,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) {
         
         if let task = currentAPITask {
             if task.state == .running {
@@ -47,7 +47,7 @@ class IPaServerAPI :NSObject {
         }
 
     }
-    func apiPut(_ api:String, json:AnyObject,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) {
+    public func apiPut(_ api:String, json:AnyObject,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) {
         var jsonError:NSError?
         var jsonData:Data?
         do {
@@ -81,7 +81,7 @@ class IPaServerAPI :NSObject {
 
 
     }
-    func apiPost(_ api:String,json:AnyObject,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) {
+    public func apiPost(_ api:String,json:AnyObject,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) {
         var jsonError:NSError?
         var jsonData:Data?
         do {

@@ -8,13 +8,14 @@
 
 import Foundation
 import IPaLog
+import IPaNetworkState
 public typealias IPaURLResourceUISuccessHandler = ((URLResponse?,Any?) -> ())!
 public typealias IPaURLResourceUIFailHandler = ((Error) -> ())!
 open class IPaURLResourceUI : NSObject,URLSessionDelegate {
     open var baseURL:String! = ""
     open var removeNSNull:Bool = true
     lazy var sessionConfiguration:URLSessionConfiguration = URLSessionConfiguration.default
-    lazy var urlSession:Foundation.URLSession = Foundation.URLSession(configuration: self.sessionConfiguration, delegate: self, delegateQueue: OperationQueue.main)
+    open lazy var urlSession:Foundation.URLSession = Foundation.URLSession(configuration: self.sessionConfiguration, delegate: self, delegateQueue: OperationQueue.main)
     func urlStringForAPI(_ api:String) -> String {
         return self.baseURL + api
     }
@@ -38,8 +39,9 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
         
     }
     func apiWithRequest(_ request:URLRequest,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) -> URLSessionDataTask {
-        
+        IPaNetworkState.startNetworking()
         let task = urlSession.dataTask(with: request, completionHandler: { (responseData,response,error) in
+            IPaNetworkState.endNetworking()
             if let error = error {
                 failure(error)
                 return
@@ -162,8 +164,10 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
         //    NSString *dataLength = [NSString stringWithFormat:@"%ld", (unsigned long)[data length]]
         //    [request setValue:dataLength forHTTPHeaderField:@"Content-Length"]
         //    [request setHTTPBody:data]
+        IPaNetworkState.startNetworking()
         let task = urlSession.uploadTask(with: request as URLRequest, from: data, completionHandler: {
             (responseData,response,error) -> Void in
+            IPaNetworkState.endNetworking()
             if let error = error {
                 failure(error)
                 return

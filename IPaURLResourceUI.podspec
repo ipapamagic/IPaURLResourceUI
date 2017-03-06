@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'IPaURLResourceUI'
-  s.version          = '1.0'
+  s.version          = '1.1'
   s.summary          = 'Easy API tools to auto parse result to JSON'
   s.homepage         = 'https://github.com/ipapamagic/IPaURLResourceUI'
   s.license          = 'MIT'
@@ -12,5 +12,6 @@ Pod::Spec.new do |s|
 
   s.source_files = '*.swift'
   s.dependency 'IPaLog'
+  s.dependency 'IPaNetworkState'
   s.pod_target_xcconfig = { 'SWIFT_VERSION' => '3.0' }
 end
