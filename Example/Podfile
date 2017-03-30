@@ -1,0 +1,12 @@
+source 'https://github.com/ipapamagic/IPaPods.git'
+use_frameworks!
+
+target 'IPaURLResourceUI_Example' do
+  pod 'IPaURLResourceUI', :path => '../'
+
+  target 'IPaURLResourceUI_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end

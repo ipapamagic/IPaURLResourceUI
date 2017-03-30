@@ -1,0 +1,22 @@
+PODS:
+  - IPaLog (1.0)
+  - IPaNetworkState (1.0)
+  - IPaURLResourceUI (1.2):
+    - IPaLog
+    - IPaNetworkState
+
+DEPENDENCIES:
+  - IPaURLResourceUI (from `../`)
+
+EXTERNAL SOURCES:
+  IPaURLResourceUI:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  IPaLog: 199e39af2831b48f83967747cadd00bbf505a103
+  IPaNetworkState: 4afea3f97cbb97b165315ef6580c7032c4123983
+  IPaURLResourceUI: dd8c7619cbfa3d05685d4239efa1512868dc507e
+
+PODFILE CHECKSUM: 39a32db49f4241d800a6b1863c62ad50777d5657
+
+COCOAPODS: 1.1.1
