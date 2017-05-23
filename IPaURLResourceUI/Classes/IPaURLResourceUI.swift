@@ -48,7 +48,7 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
             }
             var jsonData:Any?
             do {
-                if let responseData = responseData {
+                if let responseData = responseData,responseData.count > 0 {
                     jsonData = try JSONSerialization.jsonObject(with: responseData, options: JSONSerialization.ReadingOptions())
                 }
             } catch let error as NSError {
@@ -65,8 +65,8 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
             } catch {
                 fatalError()
             }
-            if self.removeNSNull {
-                jsonData = self.removeNSNullDataFromObject(jsonData!)
+            if self.removeNSNull,let wJsonData = jsonData {
+                jsonData = self.removeNSNullDataFromObject(wJsonData)
             }
             complete(response,jsonData)
         })
