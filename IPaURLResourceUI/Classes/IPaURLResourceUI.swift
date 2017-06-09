@@ -14,8 +14,7 @@ public typealias IPaURLResourceUIFailHandler = ((Error) -> ())!
 open class IPaURLResourceUI : NSObject,URLSessionDelegate {
     open var baseURL:String! = ""
     open var removeNSNull:Bool = true
-    lazy var sessionConfiguration:URLSessionConfiguration = URLSessionConfiguration.default
-    open lazy var urlSession:Foundation.URLSession = Foundation.URLSession(configuration: self.sessionConfiguration, delegate: self, delegateQueue: OperationQueue.main)
+    open lazy var urlSession:Foundation.URLSession = Foundation.URLSession(configuration: URLSessionConfiguration.default, delegate: self, delegateQueue: OperationQueue.main)
     func urlStringForAPI(_ api:String) -> String {
         return self.baseURL + api
     }
