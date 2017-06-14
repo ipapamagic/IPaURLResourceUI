@@ -56,6 +56,10 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
                     if let responseString = String(data: responseData!, encoding: String.Encoding.utf8) {
                         print(responseString)
                     }
+                        //try ascii if decode fail
+                    else if responseString = String(data: responseData!, encoding: String.Encoding.ascii) {
+                        print(responseString)
+                    }
                 #endif
                 
                 failure(error)
