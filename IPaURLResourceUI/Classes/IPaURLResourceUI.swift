@@ -138,12 +138,13 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
         
         request.url = URL(string: apiURL!)
         request.httpMethod = method
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "content-type")
         if let param = paramInHeader {
             for key in param.keys {
                 request.setValue(param[key]!,forHTTPHeaderField: key)
             }
         }
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "content-type")
+        
         
         return apiWithRequest(request as URLRequest,complete:complete,failure:failure)
         
