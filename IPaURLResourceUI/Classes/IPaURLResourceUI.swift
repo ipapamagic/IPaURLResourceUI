@@ -178,8 +178,8 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
             }
             
             #if DEBUG
-                if let responseData = responseData {
-                    let retString = String(data: responseData, encoding: .utf8)
+                if let responseData = responseData ,let retString = String(data: responseData, encoding: .utf8){
+                    
                     print("IPaURLResourceUI return string :\(retString)")
                 }
             #endif
