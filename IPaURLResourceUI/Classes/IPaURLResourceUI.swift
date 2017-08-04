@@ -50,19 +50,22 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
                 if let responseData = responseData,responseData.count > 0 {
                     jsonData = try JSONSerialization.jsonObject(with: responseData, options: JSONSerialization.ReadingOptions())
                 }
-            } catch let error as NSError {
+            } catch _ as NSError {
                 jsonData = nil
-                #if DEBUG
-                    if let responseString = String(data: responseData!, encoding: String.Encoding.utf8) {
-                        print(responseString)
-                    }
-                        //try ascii if decode fail
-                    else if let responseString = String(data: responseData!, encoding: String.Encoding.ascii) {
-                        print(responseString)
-                    }
-                #endif
+                var responseString = ""
                 
-                failure(error)
+                if let string = String(data: responseData!, encoding: String.Encoding.utf8) {
+                    IPaLog(string)
+                    responseString = string
+                }
+                    //try ascii if decode fail
+                else if let string = String(data: responseData!, encoding: String.Encoding.ascii) {
+                    IPaLog(string)
+                    responseString = string
+                }
+                
+                let notJsonError = NSError(domain: "IPaURLResourceUI", code: -1, userInfo: [NSLocalizedDescriptionKey:"Server response is not json format:\(responseString)"])
+                failure(notJsonError)
                 
                 return
             } catch {
