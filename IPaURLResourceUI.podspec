@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPaURLResourceUI'
-  s.version          = '1.3'
+  s.version          = '1.3.1'
   s.summary          = 'A short description of IPaURLResourceUI.'
 
 # This description is used to generate tags and improve search results.
