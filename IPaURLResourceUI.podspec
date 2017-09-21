@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPaURLResourceUI'
-  s.version          = '1.3.1'
+  s.version          = '2.0'
   s.summary          = 'A short description of IPaURLResourceUI.'
 
 # This description is used to generate tags and improve search results.
@@ -42,6 +42,6 @@ TODO: Add long description of the pod here.
     s.dependency 'IPaLog'
     s.dependency 'IPaNetworkState'
     s.xcconfig = {
-        "SWIFT_VERSION" => "3.0"
+        "SWIFT_VERSION" => "4.0"
     }
 end
