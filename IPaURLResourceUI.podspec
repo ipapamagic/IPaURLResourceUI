@@ -40,7 +40,7 @@ TODO: Add long description of the pod here.
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
     s.dependency 'IPaLog'
-    s.dependency 'IPaNetworkState'
+    s.dependency 'IPaNetworkState' , '~> 1,0'
     s.xcconfig = {
         "SWIFT_VERSION" => "3.0"
     }
