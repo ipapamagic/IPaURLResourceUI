@@ -9,8 +9,8 @@
 import Foundation
 import IPaLog
 import IPaNetworkState
-public typealias IPaURLResourceUISuccessHandler = ((URLResponse?,Any?) -> ())!
-public typealias IPaURLResourceUIFailHandler = ((Error) -> ())!
+public typealias IPaURLResourceUISuccessHandler = ((URLResponse?,Any?) -> ())
+public typealias IPaURLResourceUIFailHandler = ((Error) -> ())
 open class IPaURLResourceUI : NSObject,URLSessionDelegate {
     @objc open var baseURL:String! = ""
     @objc open var removeNSNull:Bool = true
@@ -41,7 +41,7 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
         
         
     }
-    func apiWithRequest(_ request:URLRequest,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) -> URLSessionDataTask {
+    func apiWithRequest(_ request:URLRequest,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) -> URLSessionDataTask {
         IPaNetworkState.startNetworking()
         let task = urlSession.dataTask(with: request, completionHandler: { (responseData,response,error) in
             IPaNetworkState.endNetworking()
@@ -86,7 +86,7 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
         return task
     }
     
-    @objc open func apiGet(_ api:String ,param:[String:Any]?,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) -> URLSessionDataTask
+    @objc open func apiGet(_ api:String ,param:[String:Any]?,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) -> URLSessionDataTask
         
     {
         let apiURL = urlStringForGETAPI(api, param: param)
@@ -96,17 +96,17 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
         
         return apiWithRequest(request as URLRequest,complete:complete,failure:failure)
     }
-    @objc open func apiPost(_ api:String , param:[String:Any]?,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) -> URLSessionDataTask
+    @objc open func apiPost(_ api:String , param:[String:Any]?,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) -> URLSessionDataTask
     {
         return apiPerform(api,method:"POST",paramInBody:param,complete:complete,failure:failure)
     }
     
     
-    @objc open func apiPut(_ api:String, param:[String:Any]?,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) -> URLSessionDataTask {
+    @objc open func apiPut(_ api:String, param:[String:Any]?,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) -> URLSessionDataTask {
         
         return apiPerform(api ,method:"PUT", paramInBody:param,complete:complete,failure:failure)
     }
-    @objc open func apiUpload(_ api:String,method:String,json:Any,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) {
+    @objc open func apiUpload(_ api:String,method:String,json:Any,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) {
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: json, options: JSONSerialization.WritingOptions(rawValue: 0))
             _ = apiUpload(api, method: method, headerParam: ["content-type":"application/json"], data: jsonData, complete: complete, failure: failure)
@@ -120,7 +120,7 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
         
         
     }
-    @objc open func apiPerform(_ api:String,method:String,paramInHeader:[String:String]?,paramInBody:[String:Any]?,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) -> URLSessionDataTask
+    @objc open func apiPerform(_ api:String,method:String,paramInHeader:[String:String]?,paramInBody:[String:Any]?,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) -> URLSessionDataTask
     {
         let method = method.uppercased()
         let apiURL = (method == "GET") ? urlStringForGETAPI(api, param: paramInBody) :  urlStringForAPI(api)
@@ -157,11 +157,11 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
         
         
     }
-    @objc open func apiPerform(_ api:String,method:String,paramInBody:[String:Any]?,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) -> URLSessionDataTask {
+    @objc open func apiPerform(_ api:String,method:String,paramInBody:[String:Any]?,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) -> URLSessionDataTask {
         return apiPerform(api, method: method, paramInHeader: nil, paramInBody: paramInBody, complete: complete, failure: failure)
         
     }
-    @objc open func apiUpload(_ api:String,method:String,headerParam:[String:String],data:Data,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) -> URLSessionUploadTask {
+    @objc open func apiUpload(_ api:String,method:String,headerParam:[String:String],data:Data,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) -> URLSessionUploadTask {
         let apiURL = urlStringForAPI(api)
         let request = NSMutableURLRequest()
         request.url = URL(string: apiURL)
@@ -212,19 +212,19 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
         task.resume()
         return task
     }
-    @objc open func apiUpload(_ api:String,method:String,multiPartFormData:IPaURLMultipartFormData,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) -> URLSessionUploadTask {
+    @objc open func apiUpload(_ api:String,method:String,multiPartFormData:IPaURLMultipartFormData,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) -> URLSessionUploadTask {
         let contentType = "multipart/form-data boundary=\(multiPartFormData.boundary)"
         multiPartFormData.endOfBodyData()
         let data = multiPartFormData.data
         return apiUpload(api, method: method, headerParam: ["content-type":contentType], data: data as Data, complete: complete, failure: failure)
     }
-    @objc open func apiPut(_ api:String,contentType:String,postData:Data,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) -> URLSessionUploadTask {
+    @objc open func apiPut(_ api:String,contentType:String,postData:Data,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) -> URLSessionUploadTask {
         return apiUpload(api, method: "PUT", headerParam: ["content-type":contentType], data: postData, complete: complete, failure: failure)
     }
-    @objc open func apiPost(_ api:String,contentType:String,postData:Data,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) -> URLSessionUploadTask {
+    @objc open func apiPost(_ api:String,contentType:String,postData:Data,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) -> URLSessionUploadTask {
         return apiUpload(api, method: "POST", headerParam: ["content-type":contentType], data: postData, complete: complete, failure: failure)
     }
-    @objc open func apiDelete(_ api:String,contentType:String,postData:Data,complete:IPaURLResourceUISuccessHandler,failure:IPaURLResourceUIFailHandler) -> URLSessionUploadTask {
+    @objc open func apiDelete(_ api:String,contentType:String,postData:Data,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) -> URLSessionUploadTask {
         return apiUpload(api, method: "DELETE", headerParam: ["content-type":contentType], data: postData, complete: complete, failure: failure)
     }
     
