@@ -14,7 +14,8 @@ public class IPaServerAPI :NSObject {
     public init(resourceUI:IPaURLResourceUI) {
         self.resourceUI = resourceUI
     }
-    public func apiPerform(_ api:String,method:String,param:[String:AnyObject]?,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) {
+
+    public func apiPerform(_ api:String,method:String,param:[String:AnyObject]?,complete:@escaping IPaURLResourceUISuccessHandler,failure:@escaping IPaURLResourceUIFailHandler) {
         
         if let task = currentAPITask {
             if task.state == .running {
@@ -47,7 +48,8 @@ public class IPaServerAPI :NSObject {
         }
 
     }
-    public func apiPut(_ api:String, json:AnyObject,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) {
+    public func apiPut(_ api:String, json:AnyObject,complete:@escaping IPaURLResourceUISuccessHandler,failure:@escaping IPaURLResourceUIFailHandler) {
+
         var jsonError:NSError?
         var jsonData:Data?
         do {
@@ -81,7 +83,7 @@ public class IPaServerAPI :NSObject {
 
 
     }
-    public func apiPost(_ api:String,json:AnyObject,complete:IPaURLResourceUISuccessHandler!,failure:IPaURLResourceUIFailHandler!) {
+    public func apiPost(_ api:String,json:AnyObject,complete:@escaping IPaURLResourceUISuccessHandler,failure:@escaping IPaURLResourceUIFailHandler) {
         var jsonError:NSError?
         var jsonData:Data?
         do {
