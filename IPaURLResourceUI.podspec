@@ -8,9 +8,9 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPaURLResourceUI'
-  s.version          = '2.0'
+  s.version          = '2.1'
   s.summary          = 'A short description of IPaURLResourceUI.'
-
+  s.swift_version    = '4.2'
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
 #   * Try to keep it short, snappy and to the point.
@@ -41,8 +41,5 @@ TODO: Add long description of the pod here.
   # s.dependency 'AFNetworking', '~> 2.3'
     s.dependency 'IPaLog'
     s.dependency 'IPaNetworkState'
-    s.xcconfig = {
-        "SWIFT_VERSION" => "4.0",
-        "SWIFT_SWIFT3_OBJC_INFERENCE" => "off"
-    }
+
 end
