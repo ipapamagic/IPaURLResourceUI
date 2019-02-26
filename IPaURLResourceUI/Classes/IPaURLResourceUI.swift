@@ -56,7 +56,7 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
                 }
             } catch _ as NSError {
                 jsonData = nil
-                var responseString = ""
+                var responseString:String = ""
                 
                 if let string = String(data: responseData!, encoding: String.Encoding.utf8) {
                     IPaLog(string)
@@ -68,10 +68,10 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
                     responseString = string
                 }
                 
-                let notJsonError = NSError(domain: "IPaURLResourceUI", code: -1, userInfo: [NSLocalizedDescriptionKey:"Server response is not json format:\(responseString)"])
-                failure(notJsonError)
-                
-                return
+//                let notJsonError = NSError(domain: "IPaURLResourceUI", code: -1, userInfo: [NSLocalizedDescriptionKey:"Server response is not json format:\(responseString)"])
+//                failure(notJsonError)
+//
+                complete(response,responseString)
             } catch {
                 fatalError()
             }
