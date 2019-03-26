@@ -8,9 +8,9 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPaURLResourceUI'
-  s.version          = '2.3'
+  s.version          = '2.4'
   s.summary          = 'A short description of IPaURLResourceUI.'
-  s.swift_version    = '4.2'
+  s.swift_version    = '5.0'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -29,8 +29,6 @@ TODO: Add long description of the pod here.
   s.source           = { :git => 'https://github.com/ipapamagic/IPaURLResourceUI.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '8.0'
-
   s.source_files = 'IPaURLResourceUI/Classes/**/*'
   
   # s.resource_bundles = {
@@ -41,7 +39,7 @@ TODO: Add long description of the pod here.
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
 
-    s.dependency 'IPaLog', '>= 2.1'
-    s.dependency 'IPaNetworkState' , '>= 2.1'
+    s.dependency 'IPaLog', '>= 2.3'
+    s.dependency 'IPaNetworkState' , '>= 2.3'
     
 end
