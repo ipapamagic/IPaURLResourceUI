@@ -15,7 +15,7 @@ public class IPaServerAPI :NSObject {
         self.resourceUI = resourceUI
     }
 
-    public func apiPerform(_ api:String,method:String,param:[String:AnyObject]?,complete:@escaping IPaURLResourceUISuccessHandler,failure:@escaping IPaURLResourceUIFailHandler) {
+    public func apiPerform(_ api:String,method:String,param:[String:AnyObject]?,complete:@escaping IPaURLResourceUIResultHandler) {
         
         if let task = currentAPITask {
             if task.state == .running {
@@ -26,29 +26,31 @@ public class IPaServerAPI :NSObject {
         let aMethod = method.uppercased()
         if aMethod == "GET" {
             currentAPITask = resourceUI.apiGet(api, param:param, complete:{
-                response,responseObject in
+                result in
                 self.currentAPITask = nil
-                complete(response,responseObject)
-                },failure:{
-                    error in
-                self.currentAPITask = nil
-                    failure(error)
+                switch (result) {
+                case .success(let (response,responseObject)):
+                    complete(.success((response,responseObject)))
+                case .failure(let error):
+                    complete(.failure(error))
+                }
             })
         }
         else if aMethod == "POST" {
             currentAPITask = resourceUI.apiPost(api, param:param,  complete:{
-                response,responseObject in
+                result in
                 self.currentAPITask = nil
-                complete(response,responseObject)
-                },failure:{
-                    error in
-                    self.currentAPITask = nil
-                    failure(error)
+                switch (result) {
+                case .success(let (response,responseObject)):
+                    complete(.success((response,responseObject)))
+                case .failure(let error):
+                    complete(.failure(error))
+                }
             })
         }
 
     }
-    public func apiPut(_ api:String, json:AnyObject,complete:@escaping IPaURLResourceUISuccessHandler,failure:@escaping IPaURLResourceUIFailHandler) {
+    public func apiPut(_ api:String, json:AnyObject,complete:@escaping IPaURLResourceUIResultHandler) {
 
         var jsonError:NSError?
         var jsonData:Data?
@@ -60,9 +62,7 @@ public class IPaServerAPI :NSObject {
         }
         
         if let error = jsonError {
-            
-            failure(error)
-            
+            complete(.failure(error))
             return
         }
         if let task = currentAPITask {
@@ -72,18 +72,19 @@ public class IPaServerAPI :NSObject {
         }
         
         currentAPITask = resourceUI.apiPut(api, contentType: "application/json", postData: jsonData!,  complete:{
-            response,responseObject in
+            result in
             self.currentAPITask = nil
-            complete(response,responseObject)
-            },failure:{
-                error in
-                self.currentAPITask = nil
-                failure(error)
+            switch (result) {
+            case .success(let (response,responseObject)):
+                complete(.success((response,responseObject)))
+            case .failure(let error):
+                complete(.failure(error))
+            }
         })
 
 
     }
-    public func apiPost(_ api:String,json:AnyObject,complete:@escaping IPaURLResourceUISuccessHandler,failure:@escaping IPaURLResourceUIFailHandler) {
+    public func apiPost(_ api:String,json:AnyObject,complete:@escaping IPaURLResourceUIResultHandler) {
         var jsonError:NSError?
         var jsonData:Data?
         do {
@@ -94,9 +95,7 @@ public class IPaServerAPI :NSObject {
         }
         
         if let error = jsonError {
-            
-            failure(error)
-            
+            complete(.failure(error))
             return
         }
         if let task = currentAPITask {
@@ -106,13 +105,14 @@ public class IPaServerAPI :NSObject {
         }
         
         currentAPITask = resourceUI.apiPost(api, contentType: "application/json", postData: jsonData!,  complete:{
-            response,responseObject in
+            result in
             self.currentAPITask = nil
-            complete(response,responseObject)
-            },failure:{
-                error in
-                self.currentAPITask = nil
-                failure(error)
+            switch (result) {
+            case .success(let (response,responseObject)):
+                complete(.success((response,responseObject)))
+            case .failure(let error):
+                complete(.failure(error))
+            }
         })
     }
 }

@@ -1,7 +1,7 @@
 PODS:
   - IPaLog (2.3)
   - IPaNetworkState (2.3)
-  - IPaURLResourceUI (2.4):
+  - IPaURLResourceUI (3.0):
     - IPaLog (>= 2.3)
     - IPaNetworkState (>= 2.3)
 
@@ -20,7 +20,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   IPaLog: c9285b90746c5ec7082db4efafe996d680a0c222
   IPaNetworkState: 483a7e48eba13700974a8fbc6357febc5cbb7315
-  IPaURLResourceUI: 5de3edec0a3e0b4de4738cafeb5334f2ca2741bb
+  IPaURLResourceUI: 68018f583fb65cb74152f7c21a86ffbaff3847ab
 
 PODFILE CHECKSUM: 39a32db49f4241d800a6b1863c62ad50777d5657
 

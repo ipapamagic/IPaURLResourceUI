@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPaURLResourceUI'
-  s.version          = '2.4'
+  s.version          = '3.0'
   s.summary          = 'A short description of IPaURLResourceUI.'
   s.swift_version    = '5.0'
 
@@ -39,7 +39,8 @@ TODO: Add long description of the pod here.
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
 
+
     s.dependency 'IPaLog', '>= 2.3'
     s.dependency 'IPaNetworkState' , '>= 2.3'
-    
+
 end
