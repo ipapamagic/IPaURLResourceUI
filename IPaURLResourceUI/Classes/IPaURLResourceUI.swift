@@ -85,13 +85,12 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
         
         return task
     }
-    
+
     open func apiGet(_ api:String ,param:[String:Any]?,complete:@escaping IPaURLResourceUIResultHandler) -> URLSessionDataTask
     {
         let apiURL = urlStringForGETAPI(api, param: param)
-        let request = NSMutableURLRequest()
+        var request = URLRequest(url: URL(string: apiURL!)!)
         request.httpMethod = "GET"
-        request.url = URL(string: apiURL!)
         
         return apiWithRequest(request as URLRequest,complete:complete)
     }
@@ -124,7 +123,7 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
     {
         let method = method.uppercased()
         let apiURL = (method == "GET") ? urlStringForGETAPI(api, param: paramInBody) :  urlStringForAPI(api)
-        let request = NSMutableURLRequest()
+        var request = URLRequest(url: URL(string: apiURL!)!)
         if let param = paramInBody , method != "GET" {
             var count = 0
             var postString = ""
@@ -143,7 +142,6 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
             
         }
         
-        request.url = URL(string: apiURL!)
         request.httpMethod = method
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "content-type")
         if let param = paramInHeader {
@@ -164,8 +162,7 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
     }
     open func apiUpload(_ api:String,method:String,headerParam:[String:String],data:Data,complete:@escaping IPaURLResourceUIResultHandler) -> URLSessionUploadTask {
         let apiURL = urlStringForAPI(api)
-        let request = NSMutableURLRequest()
-        request.url = URL(string: apiURL)
+        var request = URLRequest(url:URL(string: apiURL)!)
         request.httpMethod = method
         
         for key in headerParam.keys {
