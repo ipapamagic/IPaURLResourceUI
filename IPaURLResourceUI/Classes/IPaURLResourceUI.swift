@@ -71,7 +71,7 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
 //                failure(notJsonError)
 //
                 complete(.success((response,responseString)))
-                
+                return
             } catch {
                 fatalError()
             }
