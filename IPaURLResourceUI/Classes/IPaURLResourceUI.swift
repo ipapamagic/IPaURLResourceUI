@@ -58,12 +58,13 @@ open class IPaURLResourceUI : NSObject,URLSessionDelegate {
                 var responseString:String = ""
                 
                 if let string = String(data: responseData!, encoding: String.Encoding.utf8) {
-                    IPaLog(string)
+                    
+                    IPaLog("Request from:\(request.url?.absoluteString ?? "") \n not json response with:" + string)
                     responseString = string
                 }
                     //try ascii if decode fail
                 else if let string = String(data: responseData!, encoding: String.Encoding.ascii) {
-                    IPaLog(string)
+                    IPaLog("Request from:\(request.url?.absoluteString ?? "") \n not json response with:" + string)
                     responseString = string
                 }
                 
