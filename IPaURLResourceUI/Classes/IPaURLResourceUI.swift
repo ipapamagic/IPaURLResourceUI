@@ -226,7 +226,13 @@ open class IPaURLResourceUI : NSObject {
 //        let content = String(data: data, encoding: .utf8)
         let fileInfo =  try? FileManager.default.attributesOfItem(atPath: tempFilePath)
         let fileSize = "\(fileInfo?[FileAttributeKey.size] ?? 0)"
-        let operation = apiUploadOperation(api, method: method, headerFields:["Content-Type":contentType,"Content-Length":fileSize], fileUrl: fileUrl) { (result) in
+        var header = ["Content-Type":contentType,"Content-Length":fileSize]
+        if let headerFields = headerFields {
+            for (key,value) in headerFields {
+                header[key] = value
+            }
+        }
+        let operation = apiUploadOperation(api, method: method, headerFields:header, fileUrl: fileUrl) { (result) in
             
             complete(result)
             
