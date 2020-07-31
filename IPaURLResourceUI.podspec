@@ -40,7 +40,7 @@ TODO: Add long description of the pod here.
   # s.dependency 'AFNetworking', '~> 2.3'
 
 
-    s.dependency 'IPaLog', '>= 2.3'
+    s.dependency 'IPaLog'
     s.dependency 'IPaNetworkState' , '>= 2.3'
     s.dependency 'IPaXMLSection' , '~> 2.0'
 
