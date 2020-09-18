@@ -11,6 +11,12 @@ import IPaLog
 import IPaNetworkState
 public typealias IPaURLResourceUIResultHandler = ((Result<(URLResponse?,Any?),Error>) ->())
 open class IPaURLResourceUI : NSObject {
+    public enum HttpMethod:String {
+        case get = "GET"
+        case post = "POST"
+        case put = "PUT"
+        case delete = "DELETE"
+    }
     
     @objc open var baseURL:String! = ""
     @objc open var removeNSNull:Bool = true
@@ -69,7 +75,7 @@ open class IPaURLResourceUI : NSObject {
     {
         let apiURL = urlString(for: api, params: params)
         var request = URLRequest(url: URL(string: apiURL!)!)
-        request.httpMethod = "GET"
+        request.httpMethod = HttpMethod.get.rawValue
         
         return apiDataOperation(with: request as URLRequest,complete:complete)
     }
@@ -80,7 +86,7 @@ open class IPaURLResourceUI : NSObject {
     }
     open func apiPostOperation(_ api:String , params:[String:Any]?,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestDataOperation
     {
-        return apiDataOperation(api,method:"POST",params:params,complete:complete)
+        return apiDataOperation(api,method:HttpMethod.post,params:params,complete:complete)
     }
     open func apiPut(_ api:String, params:[String:Any]?,complete:@escaping IPaURLResourceUIResultHandler) {
         let operation = apiPutOperation(api, params: params, complete: complete)
@@ -88,32 +94,40 @@ open class IPaURLResourceUI : NSObject {
     }
     open func apiPutOperation(_ api:String, params:[String:Any]?,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestDataOperation {
         
-        return apiDataOperation(api ,method:"PUT", params:params,complete:complete)
+        return apiDataOperation(api ,method:HttpMethod.put, params:params,complete:complete)
     }
     
     
-    open func apiData(_ api:String,method:String,headerFields:[String:String]? = nil,params:[String:Any]?,complete:@escaping IPaURLResourceUIResultHandler) {
+    open func apiData(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]?,complete:@escaping IPaURLResourceUIResultHandler) {
         let operation = apiDataOperation(api, method: method, headerFields:headerFields, params:params, complete: complete)
         self.operationQueue.addOperation(operation)
     }
-    open func apiDataOperation(_ api:String,method:String,headerFields:[String:String]? = nil,params:[String:Any]?,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestDataOperation
+    open func apiDataOperation(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]?,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestDataOperation
 
     {
-        let method = method.uppercased()
-        let apiURL = urlString(for: api)
-        var request = URLRequest(url: URL(string: apiURL)!)
-        if let params = params {
-            
-            let valuePairs:[String] = params.map { (key,value) in
-                let value = "\(value)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-                return "\(key)=\(value)"
+        var apiURL:String
+        var request:URLRequest
+        if method == .get {
+            apiURL = urlString(for: api, params: params)
+            request = URLRequest(url: URL(string: apiURL)!)
+        }
+        else {
+            apiURL = urlString(for: api)
+            request = URLRequest(url: URL(string: apiURL)!)
+            if let params = params {
+                
+                let valuePairs:[String] = params.map { (key,value) in
+                    let value = "\(value)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                    return "\(key)=\(value)"
+                }
+                let postString = valuePairs.joined(separator: "&")
+                request.httpBody = postString.data(using: String.Encoding.utf8, allowLossyConversion: false)
             }
-            let postString = valuePairs.joined(separator: "&")
-            request.httpBody = postString.data(using: String.Encoding.utf8, allowLossyConversion: false)
-            
         }
         
-        request.httpMethod = method
+        
+        
+        request.httpMethod = method.rawValue
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "content-type")
         if let fields = headerFields {
             for (key,value) in fields {
@@ -122,11 +136,11 @@ open class IPaURLResourceUI : NSObject {
         }
         return apiDataOperation(with: request,complete:complete)
     }
-    open func apiUpload(_ api:String,method:String,headerFields:[String:String]?,json:Any,complete:@escaping IPaURLResourceUIResultHandler) throws {
+    open func apiUpload(_ api:String,method:HttpMethod,headerFields:[String:String]?,json:Any,complete:@escaping IPaURLResourceUIResultHandler) throws {
         let operation = try apiUploadOperation(api, method: method,headerFields:headerFields, json: json, complete: complete)
         self.operationQueue.addOperation(operation)
     }
-    open func apiUploadOperation(_ api:String,method:String,headerFields:[String:String]?,json:Any,complete:@escaping IPaURLResourceUIResultHandler) throws -> IPaURLRequestOperation {
+    open func apiUploadOperation(_ api:String,method:HttpMethod,headerFields:[String:String]?,json:Any,complete:@escaping IPaURLResourceUIResultHandler) throws -> IPaURLRequestOperation {
 
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: json, options: JSONSerialization.WritingOptions(rawValue: 0))
@@ -140,14 +154,14 @@ open class IPaURLResourceUI : NSObject {
         }
         
     }
-    func apiUpload(_ api:String,method:String,headerFields:[String:String]?,file:Any,complete:@escaping IPaURLResourceUIResultHandler) {
+    func apiUpload(_ api:String,method:HttpMethod,headerFields:[String:String]?,file:Any,complete:@escaping IPaURLResourceUIResultHandler) {
         let operation = self.apiUploadOperation(api, method: method, headerFields: headerFields,file:file, complete: complete)
         self.operationQueue.addOperation(operation)
     }
-    func apiUploadOperation(_ api:String,method:String,headerFields:[String:String]?,file:Any,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
+    func apiUploadOperation(_ api:String,method:HttpMethod,headerFields:[String:String]?,file:Any,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
         let apiURL = urlString(for: api)
         var request = URLRequest(url:URL(string: apiURL)!)
-        request.httpMethod = method
+        request.httpMethod = method.rawValue
         if let headerFields = headerFields {
             for (key,value) in headerFields {
                 request.setValue(value, forHTTPHeaderField: key)
@@ -161,34 +175,34 @@ open class IPaURLResourceUI : NSObject {
         
         return operation
     }
-    open func apiUpload(_ api:String,method:String,headerFields:[String:String]?,fileUrl:URL,complete:@escaping IPaURLResourceUIResultHandler) {
+    open func apiUpload(_ api:String,method:HttpMethod,headerFields:[String:String]?,fileUrl:URL,complete:@escaping IPaURLResourceUIResultHandler) {
         let operation = apiUploadOperation(api, method: method,headerFields: headerFields,fileUrl: fileUrl,complete:complete)
         self.operationQueue.addOperation(operation)
     }
-    open func apiUploadOperation(_ api:String,method:String,headerFields:[String:String]?,fileUrl:URL,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
+    open func apiUploadOperation(_ api:String,method:HttpMethod,headerFields:[String:String]?,fileUrl:URL,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
         return self.apiUploadOperation(api, method: method, headerFields: headerFields, file:fileUrl ,complete: complete)
     }
-    open func apiUpload(_ api:String,method:String,headerFields:[String:String]?,data:Data,complete:@escaping IPaURLResourceUIResultHandler) {
+    open func apiUpload(_ api:String,method:HttpMethod,headerFields:[String:String]?,data:Data,complete:@escaping IPaURLResourceUIResultHandler) {
         let operation = apiUploadOperation(api, method: method, headerFields: headerFields, data: data, complete: complete)
         self.operationQueue.addOperation(operation)
     }
     
-    open func apiUploadOperation(_ api:String,method:String,headerFields:[String:String]?,data:Data,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
+    open func apiUploadOperation(_ api:String,method:HttpMethod,headerFields:[String:String]?,data:Data,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
         return self.apiUploadOperation(api, method: method, headerFields: headerFields,file:data, complete: complete)
     }
-    open func apiUpload(_ api:String,method:String,headerFields:[String:String]?,params:[String:Any],file:IPaMultipartFile,complete:@escaping IPaURLResourceUIResultHandler) {
+    open func apiUpload(_ api:String,method:HttpMethod,headerFields:[String:String]?,params:[String:Any],file:IPaMultipartFile,complete:@escaping IPaURLResourceUIResultHandler) {
         let operation = self.apiUploadOperation(api, method: method, headerFields: headerFields, params:params, file:file, complete: complete)
         self.operationQueue.addOperation(operation)
     }
-    open func apiUploadOperation(_ api:String,method:String,headerFields:[String:String]?,params:[String:Any],file:IPaMultipartFile,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
+    open func apiUploadOperation(_ api:String,method:HttpMethod,headerFields:[String:String]?,params:[String:Any],file:IPaMultipartFile,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
         return self.apiUploadOperation(api, method: method, headerFields: headerFields, params: params, files: [file], complete: complete)
     }
-    open func apiUpload(_ api:String,method:String,headerFields:[String:String]?,params:[String:Any],files:[IPaMultipartFile],complete:@escaping IPaURLResourceUIResultHandler) {
+    open func apiUpload(_ api:String,method:HttpMethod,headerFields:[String:String]?,params:[String:Any],files:[IPaMultipartFile],complete:@escaping IPaURLResourceUIResultHandler) {
         let extractedExpr = apiUploadOperation(api, method: method,headerFields: headerFields, params:params, files: files, complete: complete)
         let operation = extractedExpr
         self.operationQueue.addOperation(operation)
     }
-    open func apiUploadOperation(_ api:String,method:String,headerFields:[String:String]?,params:[String:Any],files:[IPaMultipartFile],complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
+    open func apiUploadOperation(_ api:String,method:HttpMethod,headerFields:[String:String]?,params:[String:Any],files:[IPaMultipartFile],complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
         
         let tempFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent("IPaURLResponseUITemp\(UUID().uuidString)")
         let boundary:String = ProcessInfo.processInfo.globallyUniqueString
@@ -246,21 +260,21 @@ open class IPaURLResourceUI : NSObject {
         self.operationQueue.addOperation(operation)
     }
     open func apiPutOperation(_ api:String,contentType:String,postData:Data,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
-        return apiUploadOperation(api, method: "PUT", headerFields: ["content-type":contentType], data: postData, complete: complete)
+        return apiUploadOperation(api, method: HttpMethod.put, headerFields: ["content-type":contentType], data: postData, complete: complete)
     }
     open func apiPost(_ api:String,contentType:String,postData:Data,complete:@escaping IPaURLResourceUIResultHandler) {
         let operation = apiPostOperation(api, contentType: contentType,postData:postData,complete: complete)
         self.operationQueue.addOperation(operation)
     }
     open func apiPostOperation(_ api:String,contentType:String,postData:Data,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
-        return apiUploadOperation(api, method: "POST", headerFields: ["content-type":contentType], data: postData, complete: complete)
+        return apiUploadOperation(api, method: HttpMethod.post, headerFields: ["content-type":contentType], data: postData, complete: complete)
     }
     open func apiDelete(_ api:String,contentType:String,postData:Data,complete:@escaping IPaURLResourceUIResultHandler) {
         let operation = self.apiDeleteOperation(api, contentType: contentType, postData: postData, complete: complete)
         self.operationQueue.addOperation(operation)
     }
     open func apiDeleteOperation(_ api:String,contentType:String,postData:Data,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
-        return apiUploadOperation(api, method: "DELETE", headerFields: ["content-type":contentType], data: postData, complete: complete)
+        return apiUploadOperation(api, method: HttpMethod.delete, headerFields: ["content-type":contentType], data: postData, complete: complete)
     }
     func handleResponse(_ responseData:Data?,response:URLResponse?,error:Error?) -> Result<(URLResponse?,Any?),Error> {
         if let error = error {
