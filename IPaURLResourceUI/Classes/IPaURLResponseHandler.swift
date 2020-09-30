@@ -64,13 +64,13 @@ extension IPaURLResponseHandler {
 open class IPaURLJsonResponseHandler :NSObject,IPaURLResponseHandler {
     public func handleResponse(_ responseData: Data, response: URLResponse) -> Any? {
              
-            #if DEBUG
-            let urlString = response.url?.absoluteString ?? ""
-            if let retString = String(data: responseData, encoding: .utf8){
-                
-                print("IPaURLResourceUI request from:\(urlString), return string :\(retString)")
-            }
-            #endif
+//            #if DEBUG
+//            let urlString = response.url?.absoluteString ?? ""
+//            if let retString = String(data: responseData, encoding: .utf8){
+//                
+//                print("IPaURLResourceUI request from:\(urlString), return string :\(retString)")
+//            }
+//            #endif
             do {
             
                 var jsonData = try JSONSerialization.jsonObject(with: responseData, options: JSONSerialization.ReadingOptions())
