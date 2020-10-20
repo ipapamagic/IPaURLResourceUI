@@ -9,7 +9,8 @@
 import Foundation
 import IPaLog
 import IPaNetworkState
-public typealias IPaURLResourceUIResultHandler = ((Result<(URLResponse?,Any?),Error>) ->())
+public typealias IPaURLResourceUIResult = Result<(URLResponse?,Any?),Error>
+public typealias IPaURLResourceUIResultHandler = ((IPaURLResourceUIResult) ->())
 open class IPaURLResourceUI : NSObject {
     public enum HttpMethod:String {
         case get = "GET"
