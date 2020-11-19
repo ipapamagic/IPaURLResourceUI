@@ -17,6 +17,7 @@ open class IPaURLResourceUI : NSObject {
         case post = "POST"
         case put = "PUT"
         case delete = "DELETE"
+        case patch = "PATCH"
     }
     
     @objc open var baseURL:String! = ""
@@ -122,7 +123,7 @@ open class IPaURLResourceUI : NSObject {
             if let params = params {
                 
                 let valuePairs:[String] = params.map { (key,value) in
-                    let value = "\(value)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+//                    let value = "\(value)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
                     return "\(key)=\(value)"
                 }
                 let postString = valuePairs.joined(separator: "&")
@@ -323,4 +324,16 @@ extension IPaURLResourceUI :URLSessionDelegate
     }
     
 
+}
+
+
+extension IPaURLResourceUI {
+    public static func resultHandler<T>(_ result:IPaURLResourceUIResult) -> T? {
+        switch result {
+        case .success(let (_,data)):
+            return data as? T
+        case .failure(_):
+            return nil
+        }
+    }
 }

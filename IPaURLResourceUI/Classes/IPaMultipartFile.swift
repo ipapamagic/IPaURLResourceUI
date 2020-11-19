@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import MobileCoreServices
 
 public struct IPaMultipartFile {
     public var name:String
@@ -69,6 +69,20 @@ public struct IPaMultipartFile {
         self.mime = mime
         self.fileName = fileName
         self.file = fileData
+    }
+    public init(_ name:String,path:String) {
+        let url = URL(fileURLWithPath: path)
+        let pathExtension = url.pathExtension
+        self.mime = "application/octet-stream"
+        if let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension as NSString, nil)?.takeRetainedValue() {
+            if let mimetype = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType)?.takeRetainedValue() {
+                self.mime = mimetype as String
+            }
+        }
+        self.fileName = (path as NSString).lastPathComponent
+        self.name = name
+        
+        self.file = try! Data(contentsOf: url) as Any
     }
     func write(_ outputStream: OutputStream,boundary:String) {
         let dataString = "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(name)\"; filename=\"\(fileName)\"\r\nContent-Length: \(fileSize) \r\nContent-Type: \(mime)\r\n\r\n"
