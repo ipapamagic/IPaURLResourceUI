@@ -121,9 +121,10 @@ open class IPaURLResourceUI : NSObject {
             apiURL = urlString(for: api)
             request = URLRequest(url: URL(string: apiURL)!)
             if let params = params {
+                let characterSet = CharacterSet(charactersIn: "!*'();@&+$,/?%#[]~=_-.:").inverted
                 
                 let valuePairs:[String] = params.map { (key,value) in
-//                    let value = "\(value)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                    let value = "\(value)".addingPercentEncoding(withAllowedCharacters: characterSet) ?? ""
                     return "\(key)=\(value)"
                 }
                 let postString = valuePairs.joined(separator: "&")
@@ -134,7 +135,7 @@ open class IPaURLResourceUI : NSObject {
         
         
         request.httpMethod = method.rawValue
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "content-type")
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         if let fields = headerFields {
             for (key,value) in fields {
                 request.setValue(value,forHTTPHeaderField: key)
@@ -152,7 +153,7 @@ open class IPaURLResourceUI : NSObject {
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: json, options: JSONSerialization.WritingOptions(rawValue: 0))
             var header = headerFields ?? [String:String]()
-            header["content-type"] = "application/json"
+            header["Content-Type"] = "application/json"
             return apiUploadOperation(api, method: method, headerFields: header, data: jsonData, complete: complete)
             
         }
@@ -273,7 +274,7 @@ open class IPaURLResourceUI : NSObject {
         return operation
     }
     open func apiPutOperation(_ api:String,contentType:String,postData:Data,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
-        return apiUploadOperation(api, method: HttpMethod.put, headerFields: ["content-type":contentType], data: postData, complete: complete)
+        return apiUploadOperation(api, method: HttpMethod.put, headerFields: ["Content-Type":contentType], data: postData, complete: complete)
     }
     open func apiPost(_ api:String,contentType:String,postData:Data,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
         let operation = apiPostOperation(api, contentType: contentType,postData:postData,complete: complete)
@@ -281,7 +282,7 @@ open class IPaURLResourceUI : NSObject {
         return operation
     }
     open func apiPostOperation(_ api:String,contentType:String,postData:Data,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
-        return apiUploadOperation(api, method: HttpMethod.post, headerFields: ["content-type":contentType], data: postData, complete: complete)
+        return apiUploadOperation(api, method: HttpMethod.post, headerFields: ["Content-Type":contentType], data: postData, complete: complete)
     }
     open func apiDelete(_ api:String,contentType:String,postData:Data,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
         let operation = self.apiDeleteOperation(api, contentType: contentType, postData: postData, complete: complete)
@@ -289,7 +290,7 @@ open class IPaURLResourceUI : NSObject {
         return operation
     }
     open func apiDeleteOperation(_ api:String,contentType:String,postData:Data,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
-        return apiUploadOperation(api, method: HttpMethod.delete, headerFields: ["content-type":contentType], data: postData, complete: complete)
+        return apiUploadOperation(api, method: HttpMethod.delete, headerFields: ["Content-Type":contentType], data: postData, complete: complete)
     }
     func handleResponse(_ responseData:Data?,response:URLResponse?,error:Error?) -> Result<(URLResponse?,Any?),Error> {
         if let error = error {
