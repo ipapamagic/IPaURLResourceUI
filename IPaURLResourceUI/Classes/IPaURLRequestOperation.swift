@@ -13,10 +13,12 @@ open class IPaURLRequestOperation: Operation {
     var urlSession:URLSession
     var _request:URLRequest
     var _task:URLSessionTask?
+    @objc dynamic open var progress:Float = 0
+    var progressObserver:NSKeyValueObservation?
     open var request:URLRequest {
         return _request
     }
-    open var task:URLSessionTask? {
+    @objc open var task:URLSessionTask? {
         return _task
     }
     var requestCompleteBlock: IPaURLRequestOperationCompletion?
@@ -58,14 +60,22 @@ open class IPaURLRequestOperation: Operation {
     override open func start() {
         IPaNetworkState.startNetworking()
         self.willChangeValue(forKey: "isExecuting")
-        self._task = self.createTask { (responseData, response, error) in
+        let task = self.createTask { (responseData, response, error) in
             
             self.requestCompleteBlock?(responseData, response, error)
             self.willChangeValue(forKey: "isFinished")
             self.requestCompleteBlock = nil
             self.didChangeValue(forKey: "isFinished")
             IPaNetworkState.endNetworking()
+            self.progressObserver?.invalidate()
+            self.progressObserver = nil
         }
+        self._task = task
+        
+        self.progressObserver = task.observe(\.countOfBytesSent) { (task, value) in
+            self.progress = Float(task.countOfBytesSent) / Float(task.countOfBytesExpectedToSend)
+        }
+        
         
         self._task?.resume()
         self.didChangeValue(forKey: "isExecuting")
