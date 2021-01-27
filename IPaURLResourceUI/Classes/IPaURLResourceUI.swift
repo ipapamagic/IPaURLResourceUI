@@ -9,7 +9,7 @@
 import Foundation
 import IPaLog
 import IPaNetworkState
-public typealias IPaURLResourceUIResult = Result<(URLResponse?,Any?),Error>
+public typealias IPaURLResourceUIResult = Result<(URLResponse?,Data),Error>
 public typealias IPaURLResourceUIResultHandler = ((IPaURLResourceUIResult) ->())
 open class IPaURLResourceUI : NSObject {
     public enum HttpMethod:String {
@@ -22,21 +22,13 @@ open class IPaURLResourceUI : NSObject {
     
     @objc open var baseURL:String! = ""
     @objc open var removeNSNull:Bool = true
-    var responseHandler:IPaURLResponseHandler
     var operationQueue:OperationQueue = OperationQueue()
     @objc open lazy var urlSession:URLSession = {
         weak var weakSelf = self
         let session = URLSession(configuration: URLSessionConfiguration.default, delegate: weakSelf, delegateQueue: OperationQueue.main)
         return session
     }()
-    public override init() {
-        self.responseHandler = IPaURLJsonResponseHandler()
-        super.init()
-    }
-    public init(_ responseHandler:IPaURLResponseHandler) {
-        self.responseHandler = responseHandler
-        super.init()
-    }
+    
     open func urlString(for api:String) -> String {
         return self.baseURL + api
     }
@@ -292,7 +284,7 @@ open class IPaURLResourceUI : NSObject {
     open func apiDeleteOperation(_ api:String,contentType:String,postData:Data,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadOperation {
         return apiUploadOperation(api, method: HttpMethod.delete, headerFields: ["Content-Type":contentType], data: postData, complete: complete)
     }
-    func handleResponse(_ responseData:Data?,response:URLResponse?,error:Error?) -> Result<(URLResponse?,Any?),Error> {
+    func handleResponse(_ responseData:Data?,response:URLResponse?,error:Error?) -> IPaURLResourceUIResult {
         if let error = error {
             return .failure(error)
             
@@ -306,9 +298,7 @@ open class IPaURLResourceUI : NSObject {
             return .failure(error)
             
         }
-        let decodeData:Any? = self.responseHandler.handleResponse(responseData, response: response)
-
-        return .success((response,decodeData))
+        return .success((response,responseData))
     }
 }
 

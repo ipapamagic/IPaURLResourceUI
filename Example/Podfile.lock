@@ -1,9 +1,12 @@
 PODS:
   - IPaLog (2.3)
   - IPaNetworkState (2.3)
-  - IPaURLResourceUI (3.0):
-    - IPaLog (>= 2.3)
+  - IPaURLResourceUI (4.0):
+    - IPaLog
     - IPaNetworkState (>= 2.3)
+    - IPaXMLSection (~> 2.0)
+  - IPaXMLSection (2.0):
+    - IPaLog
 
 DEPENDENCIES:
   - IPaURLResourceUI (from `../`)
@@ -12,6 +15,7 @@ SPEC REPOS:
   https://github.com/ipapamagic/IPaPods.git:
     - IPaLog
     - IPaNetworkState
+    - IPaXMLSection
 
 EXTERNAL SOURCES:
   IPaURLResourceUI:
@@ -20,8 +24,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   IPaLog: 94e55e52fa0a4c3954ae8bf19bb56291d4d7ccb8
   IPaNetworkState: 483a7e48eba13700974a8fbc6357febc5cbb7315
-  IPaURLResourceUI: 9cd5c49c59902a320f63949fb05c1e4fb4933985
+  IPaURLResourceUI: 4a12c0bfb6924f241d25772c4bebcb2f9283a45a
+  IPaXMLSection: 0ab0305f5cd3ab1222f53c830db29c8299f41950
 
 PODFILE CHECKSUM: 39a32db49f4241d800a6b1863c62ad50777d5657
 
-COCOAPODS: 1.8.3
+COCOAPODS: 1.10.0
