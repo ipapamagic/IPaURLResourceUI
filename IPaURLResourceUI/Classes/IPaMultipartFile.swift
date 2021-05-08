@@ -91,6 +91,7 @@ public struct IPaMultipartFile {
         }
         _ = data.withUnsafeBytes {
             outputStream.write($0.bindMemory(to: UInt8.self).baseAddress!, maxLength: data.count)
+            
         }
         var inputFileStream:InputStream!
         switch file {

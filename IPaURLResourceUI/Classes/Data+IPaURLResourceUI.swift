@@ -58,15 +58,13 @@ extension Data {
         }
         return mArray;
     }
-    public func decodeJson() throws -> Any? {
-        var jsonData = try JSONSerialization.jsonObject(with: self, options: JSONSerialization.ReadingOptions())
-        
-        
-        jsonData = self.removeNSNullDataFromObject(jsonData)
-        
-        return jsonData
+    public var jsonData:Any? {
+        guard let jsonData = try? JSONSerialization.jsonObject(with: self, options: JSONSerialization.ReadingOptions()) else {
+            return nil
+        }
+        return self.removeNSNullDataFromObject(jsonData)
     }
-    public func decodeXML() throws -> Any? {
+    public var xmlData:Any? {
         guard let section = IPaXMLSection(self) else {
             return nil
         }
