@@ -84,6 +84,34 @@ public struct IPaMultipartFile {
         
         self.file = try! Data(contentsOf: url) as Any
     }
+    func generateFormData(_ boundary:String) -> Data {
+        var formData = Data()
+        let dataString = "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(name)\"; filename=\"\(fileName)\"\r\nContent-Length: \(fileSize) \r\nContent-Type: \(mime)\r\n\r\n"
+        guard let data = dataString.data(using: .utf8, allowLossyConversion: false) else {
+            return Data()
+        }
+        
+        formData.append(data)
+        
+        var fData:Data = Data()
+        switch file {
+        case let filePath as String:
+            fData = try! Data(contentsOf: URL(fileURLWithPath: filePath))
+        case let fileUrl as URL:
+            fData = try! Data(contentsOf: fileUrl)
+        case let fileData as Data:
+            fData = fileData
+        default:
+            break
+        }
+        formData.append(fData)
+        let endString = "\r\n"
+        guard let endData = endString.data(using: .utf8, allowLossyConversion: false) else {
+            return Data()
+        }
+        formData.append(endData)
+        return formData
+    }
     func write(_ outputStream: OutputStream,boundary:String) {
         let dataString = "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(name)\"; filename=\"\(fileName)\"\r\nContent-Length: \(fileSize) \r\nContent-Type: \(mime)\r\n\r\n"
         guard let data = dataString.data(using: .utf8, allowLossyConversion: false) else {

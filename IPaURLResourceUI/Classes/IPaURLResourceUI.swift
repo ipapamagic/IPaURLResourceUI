@@ -117,7 +117,7 @@ public class IPaURLResourceUI : NSObject {
         return self.apiData(with: request, complete: complete)
     }
     @discardableResult
-    public func apiUpload(_ api:String,method:HttpMethod,headerFields:[String:String]?,json:Any,complete:@escaping IPaURLResourceUIResultHandler) throws -> IPaURLRequestTaskOperation {
+    public func apiUpload(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,json:Any,complete:@escaping IPaURLResourceUIResultHandler) throws -> IPaURLRequestTaskOperation {
         
         let jsonData = try JSONSerialization.data(withJSONObject: json, options: JSONSerialization.WritingOptions(rawValue: 0))
         var header = headerFields ?? [String:String]()
@@ -180,18 +180,8 @@ public class IPaURLResourceUI : NSObject {
     func handleResponse(_ responseData:Data?,response:URLResponse?,error:Error?) -> IPaURLResourceUIResult {
         if let error = error {
             return .failure(error)
-            
         }
-        guard let response = response else {
-            let error = NSError(domain: "com.IPaURLResponseUI", code: 3000, userInfo: [NSLocalizedDescriptionKey:"there is no response !!"])
-            return .failure(error)
-        }
-        guard let responseData = responseData,responseData.count > 0 else {
-            let error = NSError(domain: "com.IPaURLResponseUI", code: 3001, userInfo: [NSLocalizedDescriptionKey:"there is no response for \(response.url?.absoluteString ?? "(unknown url)")"])
-            return .failure(error)
-            
-        }
-        return .success((response,responseData))
+        return .success((response,responseData ?? Data()))
     }
 }
 
@@ -218,6 +208,10 @@ extension IPaURLResourceUI {
         let request = self.generateURLRequest(api, method: method, headerFields: headerFields, params: params)
         return self.urlSession.dataTaskPublisher(for: request)
     }
+    public func apiDataTaskPublisher(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,json:Any) -> URLSession.DataTaskPublisher {
+        let jsonData = try! JSONSerialization.data(withJSONObject: json, options: JSONSerialization.WritingOptions(rawValue: 0))
+        return self.apiDataTaskPublisher(api, method: method,headerFields: headerFields,httpBody: jsonData)
+    }
     public func apiDataTaskPublisher(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,httpBody:Data) -> URLSession.DataTaskPublisher {
         var request = self.generateURLRequest(api, method: method, headerFields: headerFields)
         request.httpBody = httpBody
@@ -227,7 +221,7 @@ extension IPaURLResourceUI {
         return self.urlSession.dataTaskPublisher(for: request)
     }
     @discardableResult
-    public func apiData<T>(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]? = nil,handle:@escaping ((URLSession.DataTaskPublisher)-> AnyPublisher<T, Error>),receiveValue:((T)->())?,complete:((Subscribers.Completion<Error>)->())? ) -> IPaURLRequestPublisherOperation<T> {
+    public func apiData<T>(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]? = nil,handle:@escaping ((URLSession.DataTaskPublisher)-> AnyPublisher<T, Error>),receiveValue:((T)->())? = nil,complete:((Subscribers.Completion<Error>)->())? = nil ) -> IPaURLRequestPublisherOperation<T> {
         let request = self.generateURLRequest(api, method: method, headerFields: headerFields, params: params)
         let operation = self.apiDataOperation(with:request, handle: handle, receiveValue: receiveValue, complete: complete)
         self.operationQueue.addOperation(operation)
@@ -235,7 +229,7 @@ extension IPaURLResourceUI {
     }
     
     @discardableResult
-    public func apiData<T>(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,json:Any,handle:@escaping ((URLSession.DataTaskPublisher)-> AnyPublisher<T, Error>),receiveValue:((T)->())?,complete:((Subscribers.Completion<Error>)->())? ) -> IPaURLRequestPublisherOperation<T> {
+    public func apiData<T>(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,json:Any,handle:@escaping ((URLSession.DataTaskPublisher)-> AnyPublisher<T, Error>),receiveValue:((T)->())? = nil,complete:((Subscribers.Completion<Error>)->())? = nil) -> IPaURLRequestPublisherOperation<T> {
         
         var header = headerFields ?? [String:String]()
         header["Content-Type"] = "application/json"
@@ -250,6 +244,22 @@ extension IPaURLResourceUI {
         return IPaURLRequestPublisherOperation(urlSession: urlSession, request: request, handle: handle, receiveValue: receiveValue, complete: complete)
         
     }
-    
+    @discardableResult
+    public func apiFormData<T>(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]? = nil,files:[IPaMultipartFile],handle:@escaping ((URLSession.DataTaskPublisher)-> AnyPublisher<T, Error>),receiveValue:((T)->())?,complete:((Subscribers.Completion<Error>)->())? ) -> IPaURLRequestFormDataPublisherOperation<T> {
+        let request = self.generateURLRequest(api, method: method, headerFields: headerFields, params: params)
+        let operation = self.apiFormDataOperation( with: request,params:params,files:files,handle:handle,receiveValue:receiveValue,complete:complete)
+        self.operationQueue.addOperation(operation)
+        return operation
+    }
+    public func apiFormDataTaskPublisher(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]? = nil,files:[IPaMultipartFile]) -> URLSession.DataTaskPublisher {
+        var request = self.generateURLRequest(api, method: method, headerFields: headerFields)
+        request.writeFormData(params ?? [String:Any](), files: files)
+//        request.httpBody = httpBody
+        return self.urlSession.dataTaskPublisher(for: request)
+    }
+    public func apiFormDataOperation<T>(with request:URLRequest,params:[String:Any]? = nil,files:[IPaMultipartFile],handle:@escaping ((URLSession.DataTaskPublisher)-> AnyPublisher<T, Error>),receiveValue:((T)->())?,complete:((Subscribers.Completion<Error>)->())? ) -> IPaURLRequestFormDataPublisherOperation<T> {
+        return IPaURLRequestFormDataPublisherOperation(urlSession: urlSession, request: request,params:params ?? [String:Any](),files:files, handle: handle, receiveValue: receiveValue, complete: complete)
+        
+    }
     
 }

@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import IPaLog
 extension IPaURLResourceUIResult {
     public var responseData:Data? {
         switch self {
@@ -18,6 +19,106 @@ extension IPaURLResourceUIResult {
     }
     public func jsonData<T>() -> T? {
         self.responseData?.jsonData as? T
+    }
+}
+extension URLRequest {
+    mutating func writeFormData(_ params:[String:Any] = [String:Any](),files:[IPaMultipartFile]) {
+        var formData = Data()
+        let boundary:String = ProcessInfo.processInfo.globallyUniqueString
+        var dataString = ""
+        for (key,value) in params {
+            dataString += "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\"\r\n\r\n\(value)\r\n"
+        }
+        if dataString.count > 0, let data = dataString.data(using: .utf8, allowLossyConversion: false) {
+            formData.append(data)
+        }
+        for file in files {
+            formData.append(file.generateFormData(boundary))
+        }
+        let endOfDataString = "--\(boundary)--\r\n"
+        if let data = endOfDataString.data(using: .utf8, allowLossyConversion: false)  {
+            formData.append(data)
+        }
+        self.httpBody = formData
+    }
+   
+}
+protocol IPaURLFormDataStreamWriter:StreamDelegate {
+    var files:[IPaMultipartFile] {get}
+    var params:[String:Any] {get}
+    var tempFilePath:String {get}
+    var _request:URLRequest {get set}
+    func createOutputStream()
+    func startURLConnection()
+}
+extension IPaURLFormDataStreamWriter
+{
+    func createOutputStream() {
+        let outputStream = OutputStream(toFileAtPath: tempFilePath, append: false)!
+        outputStream.delegate = self
+        
+        outputStream.schedule(in: RunLoop.main, forMode:.default)
+        
+        outputStream.open()
+    }
+    func streamDelegateFunction(_ aStream: Stream, handle eventCode: Stream.Event) {
+        guard let outputStream = aStream as? OutputStream else {
+            return
+        }
+        switch eventCode {
+        case .errorOccurred:
+            if let errorString = aStream.streamError?.localizedDescription {
+                IPaLog(errorString)
+            }
+//        case .openCompleted:
+//            IPaLog("Stream open completed")
+        case .hasSpaceAvailable:
+            let boundary:String = ProcessInfo.processInfo.globallyUniqueString
+            let contentType = "multipart/form-data; boundary=\(boundary)"
+            var dataString = ""
+            for (key,value) in params {
+                dataString += "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\"\r\n\r\n\(value)\r\n"
+            }
+            if dataString.count > 0, let data = dataString.data(using: .utf8, allowLossyConversion: false) {
+                _ = data.withUnsafeBytes {
+                    outputStream.write($0.bindMemory(to: UInt8.self).baseAddress!, maxLength: data.count)
+                    
+                }
+            }
+            for file in files {
+                file.write(outputStream, boundary: boundary)
+            }
+            let endOfDataString = "--\(boundary)--\r\n"
+            if let data = endOfDataString.data(using: .utf8, allowLossyConversion: false)  {
+                _ = data.withUnsafeBytes {
+                    outputStream.write($0.bindMemory(to: UInt8.self).baseAddress!, maxLength: data.count)
+                }
+            }
+            outputStream.close()
+            
+    //        let data = try! Data(contentsOf: fileUrl)
+    //        let content = String(data: data, encoding: .utf8)
+            let fileInfo =  try? FileManager.default.attributesOfItem(atPath: tempFilePath)
+            let fileSize = "\(fileInfo?[FileAttributeKey.size] ?? 0)"
+            let header = ["Content-Type":contentType,"Content-Length":fileSize]
+            
+            for (key,value) in header {
+                self._request.setValue(value, forHTTPHeaderField: key)
+            }
+            self.startURLConnection()
+        case .endEncountered:
+            
+            
+            if let _ = aStream.property(forKey: .dataWrittenToMemoryStreamKey) {
+                IPaLog("No data written to memory!");
+            }
+            aStream.close()
+            aStream.remove(from: RunLoop.current, forMode: .default)
+            
+            break;
+        default:
+            break
+        }
     }
 }
 

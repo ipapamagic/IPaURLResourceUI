@@ -102,7 +102,8 @@ public class IPaURLRequestDataTaskOperation :IPaURLRequestTaskOperation {
         
     }
 }
-public class IPaURLRequestFormDataUploadTaskOperation:IPaURLRequestTaskOperation, StreamDelegate {
+public class IPaURLRequestFormDataUploadTaskOperation:IPaURLRequestTaskOperation, IPaURLFormDataStreamWriter {
+    var outputStream: OutputStream?
     var params:[String:Any]
     var files:[IPaMultipartFile]
     lazy var tempFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent("IPaURLResponseUITemp\(UUID().uuidString)")
@@ -113,12 +114,7 @@ public class IPaURLRequestFormDataUploadTaskOperation:IPaURLRequestTaskOperation
         
     }
     override func executeOperation() {
-        let outputStream = OutputStream(toFileAtPath: tempFilePath, append: false)!
-        outputStream.delegate = self
-        
-        outputStream.schedule(in: RunLoop.main, forMode:.default)
-        
-        outputStream.open()
+        self.createOutputStream()
     }
     public override func createTask(_ complete: @escaping (Data?, URLResponse?, Error?) -> ()) -> URLSessionTask {
         
@@ -131,64 +127,9 @@ public class IPaURLRequestFormDataUploadTaskOperation:IPaURLRequestTaskOperation
             
     }
     public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
-        guard let outputStream = aStream as? OutputStream else {
-            return
-        }
-        switch eventCode {
-        case .errorOccurred:
-            if let errorString = aStream.streamError?.localizedDescription {
-                IPaLog(errorString)
-            }
-//        case .openCompleted:
-//            IPaLog("Stream open completed")
-        case .hasSpaceAvailable:
-            let boundary:String = ProcessInfo.processInfo.globallyUniqueString
-            let contentType = "multipart/form-data; boundary=\(boundary)"
-            var dataString = ""
-            for (key,value) in params {
-                dataString += "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\"\r\n\r\n\(value)\r\n"
-            }
-            if dataString.count > 0, let data = dataString.data(using: .utf8, allowLossyConversion: false) {
-                _ = data.withUnsafeBytes {
-                    outputStream.write($0.bindMemory(to: UInt8.self).baseAddress!, maxLength: data.count)
-                    
-                }
-            }
-            for file in files {
-                file.write(outputStream, boundary: boundary)
-            }
-            let endOfDataString = "--\(boundary)--\r\n"
-            if let data = endOfDataString.data(using: .utf8, allowLossyConversion: false)  {
-                _ = data.withUnsafeBytes {
-                    outputStream.write($0.bindMemory(to: UInt8.self).baseAddress!, maxLength: data.count)
-                }
-            }
-            outputStream.close()
-            
-    //        let data = try! Data(contentsOf: fileUrl)
-    //        let content = String(data: data, encoding: .utf8)
-            let fileInfo =  try? FileManager.default.attributesOfItem(atPath: tempFilePath)
-            let fileSize = "\(fileInfo?[FileAttributeKey.size] ?? 0)"
-            let header = ["Content-Type":contentType,"Content-Length":fileSize]
-            
-            for (key,value) in header {
-                self._request.setValue(value, forHTTPHeaderField: key)
-            }
-            self.startURLConnection()
-        case .endEncountered:
-            
-            
-            if let _ = aStream.property(forKey: .dataWrittenToMemoryStreamKey) {
-                IPaLog("No data written to memory!");
-            }
-            aStream.close()
-            aStream.remove(from: RunLoop.current, forMode: .default)
-            
-            break;
-        default:
-            break
-        }
+        self.streamDelegateFunction(aStream,handle: eventCode)
     }
+    
 }
 public class IPaURLRequestUploadTaskOperation:IPaURLRequestTaskOperation {
     var file:Any
@@ -246,6 +187,13 @@ public class IPaURLRequestPublisherOperation<T>:Operation {
     override public func start() {
         IPaNetworkState.startNetworking()
         self.willChangeValue(forKey: "isExecuting")
+        self.executeOperation()
+        self.didChangeValue(forKey: "isExecuting")
+    }
+    func executeOperation() {
+        self.startURLConnection()
+    }
+    func startURLConnection() {
         let dataPublisher = self.urlSession.dataTaskPublisher(for: request)
         let publisher:AnyPublisher<T, Error> = self.publisherHandler(dataPublisher)
         self.anyCancellable = publisher.sink(receiveCompletion: {
@@ -260,11 +208,27 @@ public class IPaURLRequestPublisherOperation<T>:Operation {
             value in
             self.receiveValueHandler?(value)
         })
-        
-        
-        self.didChangeValue(forKey: "isExecuting")
     }
     override public func cancel() {
         self.anyCancellable?.cancel()
+    }
+}
+@available(iOS 13.0, *)
+public class IPaURLRequestFormDataPublisherOperation<T>:IPaURLRequestPublisherOperation<T>,IPaURLFormDataStreamWriter {
+    var outputStream:OutputStream?
+    var files:[IPaMultipartFile]
+    lazy var tempFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent("IPaURLResponseUITemp\(UUID().uuidString)")
+    var params: [String : Any]
+    init(urlSession: URLSession, request: URLRequest, params:[String:Any] = [String:Any](),files:[IPaMultipartFile],handle: @escaping ((URLSession.DataTaskPublisher)-> AnyPublisher<T, Error>),receiveValue: ((T)->())?,complete:((Subscribers.Completion<Error>)->())? ) {
+        self.params = params
+        self.files = files
+        super.init(urlSession: urlSession, request: request,handle: handle,receiveValue: receiveValue,complete: complete)
+        
+    }
+    override func executeOperation() {
+        self.createOutputStream()
+    }
+    public func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
+        self.streamDelegateFunction(aStream,handle: eventCode)
     }
 }
