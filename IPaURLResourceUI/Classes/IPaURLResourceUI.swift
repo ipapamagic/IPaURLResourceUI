@@ -24,14 +24,14 @@ public class IPaURLResourceUI : NSObject {
         case patch = "PATCH"
     }
     
-    @objc public var baseURL:String! = ""
+    public var baseURL:String! = ""
     public var delegate:IPaURLResourceUIDelegate?
     var sharedHeader:[String:String] {
         delegate?.sharedHeader(for: self) ?? [String:String]()
     }
-    @objc public var removeNSNull:Bool = true
+    public var removeNSNull:Bool = true
     var operationQueue:OperationQueue = OperationQueue()
-    @objc public lazy var urlSession:URLSession = {
+    public lazy var urlSession:URLSession = {
         weak var weakSelf = self
         let session = URLSession(configuration: URLSessionConfiguration.default, delegate: weakSelf, delegateQueue: OperationQueue.main)
         return session

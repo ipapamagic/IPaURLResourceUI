@@ -13,20 +13,28 @@ public typealias IPaURLRequestOperationCompletion = ((Data?,URLResponse?,Error?)
 public class IPaURLRequestTaskOperation: Operation {
     var urlSession:URLSession
     var _request:URLRequest
-    var _task:URLSessionTask?
-    @objc dynamic public var progress:Float = 0
-    var progressObserver:NSKeyValueObservation?
+    @objc dynamic var _task:URLSessionTask?
+    
     public var request:URLRequest {
         return _request
     }
-    @objc public var task:URLSessionTask? {
+    public var task:URLSessionTask? {
         return _task
+    }
+    @objc dynamic public var progress:Double {
+        return self.task?.progress.fractionCompleted ?? 0
     }
     var requestCompleteBlock: IPaURLRequestOperationCompletion?
     init(urlSession:URLSession,request:URLRequest,complete:@escaping IPaURLRequestOperationCompletion) {
         self.urlSession = urlSession
         self._request = request
         self.requestCompleteBlock = complete
+    }
+    @objc class public override func keyPathsForValuesAffectingValue(forKey key: String) -> Set<String> {
+        if key == "progress" {
+            return Set(arrayLiteral: "_task","_task.progress.fractionCompleted")
+        }
+        return super.keyPathsForValuesAffectingValue(forKey: key)
     }
     override public var isExecuting:Bool {
         get {
@@ -75,16 +83,9 @@ public class IPaURLRequestTaskOperation: Operation {
             self.requestCompleteBlock = nil
             self.didChangeValue(forKey: "isFinished")
             IPaNetworkState.endNetworking()
-            self.progressObserver?.invalidate()
-            self.progressObserver = nil
+            
         }
         self._task = task
-        
-        self.progressObserver = task.observe(\.countOfBytesSent) { (task, value) in
-            self.progress = Float(task.countOfBytesSent) / Float(task.countOfBytesExpectedToSend)
-        }
-        
-        
         task.resume()
     }
     override public func cancel() {
@@ -93,7 +94,7 @@ public class IPaURLRequestTaskOperation: Operation {
     func createTask(_ complete:@escaping (Data?,URLResponse?,Error?)->()) -> URLSessionTask {
         fatalError("do not use IPaURLRequestOperation directly!")
     }
-    
+   
 }
 public class IPaURLRequestDataTaskOperation :IPaURLRequestTaskOperation {
     public override func createTask(_ complete:@escaping IPaURLRequestOperationCompletion) -> URLSessionTask {
