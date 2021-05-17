@@ -41,7 +41,7 @@ TODO: Add long description of the pod here.
 
 
     s.dependency 'IPaLog'
-    s.dependency 'IPaNetworkState' , '>= 2.3'
+    
     s.dependency 'IPaXMLSection' , '~> 2.0'
   
 

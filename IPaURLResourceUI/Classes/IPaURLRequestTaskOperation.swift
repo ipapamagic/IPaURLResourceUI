@@ -7,7 +7,6 @@
 
 import Foundation
 import IPaLog
-import IPaNetworkState
 import Combine
 public typealias IPaURLRequestOperationCompletion = ((Data?,URLResponse?,Error?)->())
 public class IPaURLRequestTaskOperation: Operation {
@@ -67,7 +66,6 @@ public class IPaURLRequestTaskOperation: Operation {
         }
     }
     override public func start() {
-        IPaNetworkState.startNetworking()
         self.willChangeValue(forKey: "isExecuting")
         self.executeOperation()
         self.didChangeValue(forKey: "isExecuting")
@@ -82,7 +80,6 @@ public class IPaURLRequestTaskOperation: Operation {
             self.willChangeValue(forKey: "isFinished")
             self.requestCompleteBlock = nil
             self.didChangeValue(forKey: "isFinished")
-            IPaNetworkState.endNetworking()
             
         }
         self._task = task
@@ -186,7 +183,6 @@ public class IPaURLRequestPublisherOperation<T>:Operation {
         }
     }
     override public func start() {
-        IPaNetworkState.startNetworking()
         self.willChangeValue(forKey: "isExecuting")
         self.executeOperation()
         self.didChangeValue(forKey: "isExecuting")

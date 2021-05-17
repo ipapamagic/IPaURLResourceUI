@@ -8,7 +8,6 @@
 
 import Foundation
 import IPaLog
-import IPaNetworkState
 import Combine
 public typealias IPaURLResourceUIResult = Result<(URLResponse?,Data),Error>
 public typealias IPaURLResourceUIResultHandler = ((IPaURLResourceUIResult) ->())
