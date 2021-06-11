@@ -9,16 +9,24 @@ import Foundation
 import Combine
 import IPaLog
 extension IPaURLResourceUIResult {
-    public var responseData:Data? {
+    public func getResponseData() throws -> Data {
         switch self {
         case .success(let (_,data)):
             return data
-        case .failure(_):
-            return nil
+        case .failure(let error):
+            throw error
         }
     }
     public func jsonData<T>() -> T? {
-        self.responseData?.jsonData as? T
+        (try? self.getResponseData())?.jsonData as? T
+    }
+    public func tryJsonData<T>() throws -> T?  {
+        do {
+            return try self.getResponseData().jsonData as? T
+        }
+        catch let error {
+            throw error
+        }
     }
 }
 extension URLRequest {
