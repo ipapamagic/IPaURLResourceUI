@@ -21,12 +21,7 @@ extension IPaURLResourceUIResult {
         (try? self.getResponseData())?.jsonData as? T
     }
     public func tryJsonData<T>() throws -> T?  {
-        do {
-            return try self.getResponseData().jsonData as? T
-        }
-        catch let error {
-            throw error
-        }
+        return try self.getResponseData().jsonData as? T
     }
 }
 extension URLRequest {
