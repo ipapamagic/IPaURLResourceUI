@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPaURLResourceUI'
-  s.version          = '5.1'
+  s.version          = '5.2'
   s.summary          = 'A short description of IPaURLResourceUI.'
   s.swift_version    = '5.3'
   s.ios.deployment_target = '11.0'

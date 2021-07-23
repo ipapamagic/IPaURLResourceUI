@@ -13,6 +13,8 @@ public typealias IPaURLResourceUIResult = Result<(URLResponse?,Data),Error>
 public typealias IPaURLResourceUIResultHandler = ((IPaURLResourceUIResult) ->())
 public protocol IPaURLResourceUIDelegate {
     func sharedHeader(for resourceUI:IPaURLResourceUI) -> [String:String]
+    func handleChallenge(_ challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
+    func handleResponse(_ response:HTTPURLResponse,responseData:Data?) -> Error?
 }
 public class IPaURLResourceUI : NSObject {
     public enum HttpMethod:String {
@@ -23,7 +25,7 @@ public class IPaURLResourceUI : NSObject {
         case patch = "PATCH"
     }
     
-    public var baseURL:String! = ""
+    public var baseUrl:URL!
     public var delegate:IPaURLResourceUIDelegate?
     var sharedHeader:[String:String] {
         delegate?.sharedHeader(for: self) ?? [String:String]()
@@ -36,36 +38,29 @@ public class IPaURLResourceUI : NSObject {
         return session
     }()
     
-    public init(with baseURL:String,delegate:IPaURLResourceUIDelegate? = nil) {
+    public init(with baseUrl:URL,delegate:IPaURLResourceUIDelegate? = nil) {
         super.init()
-        self.baseURL = baseURL
+        self.baseUrl = baseUrl
         self.delegate = delegate
     }
-    public func urlString(for api:String) -> String {
-        return self.baseURL + api
-    }
-    public func urlString(for getApi:String!, params:[String:Any]?) -> String! {
-        var apiURL = self.baseURL + getApi
-        
-        if let params = params {
-            let paramStrings = params.map { (key,value) in
-                return "\(key)=\(value)"
-            }
-            apiURL = apiURL + "?" + paramStrings.joined(separator: "&")
-        }
-        
-        return ((apiURL as NSString).addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed))!
-    }
+
     func generateURLRequest(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]? = nil) -> URLRequest {
-        var apiURL:String
+        var apiURL:URL = self.baseUrl.appendingPathComponent(api)
         var request:URLRequest
         if method == .get {
-            apiURL = urlString(for: api, params: params)
-            request = URLRequest(url: URL(string: apiURL)!)
+            var apiURLComponent = URLComponents(url: apiURL, resolvingAgainstBaseURL: true)!
+            
+            if let params = params {
+                apiURLComponent.queryItems = params.map { (key,value) in
+                    return URLQueryItem(name: key, value: "\(value)")
+                }
+                
+            }
+            request = URLRequest(url: apiURLComponent.url!)
         }
         else {
-            apiURL = urlString(for: api)
-            request = URLRequest(url: URL(string: apiURL)!)
+            
+            request = URLRequest(url: apiURL)
             if let params = params {
                 let characterSet = CharacterSet(charactersIn: "!*'();@&+$,/?%#[]~=_-.:").inverted
                 
@@ -180,6 +175,9 @@ public class IPaURLResourceUI : NSObject {
         if let error = error {
             return .failure(error)
         }
+        else if let httpResponse:HTTPURLResponse = response as? HTTPURLResponse, let error = self.delegate?.handleResponse(httpResponse, responseData: responseData) {
+            return .failure(error)
+        }
         return .success((response,responseData ?? Data()))
     }
 }
@@ -196,7 +194,11 @@ extension IPaURLResourceUI :URLSessionDelegate
         
     }
     
-
+    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+       
+        
+        self.delegate?.handleChallenge(challenge, completionHandler: completionHandler)
+    }
 }
 
 
