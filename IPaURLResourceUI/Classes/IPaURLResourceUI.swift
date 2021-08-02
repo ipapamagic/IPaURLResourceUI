@@ -45,7 +45,7 @@ public class IPaURLResourceUI : NSObject {
     }
 
     func generateURLRequest(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]? = nil) -> URLRequest {
-        var apiURL:URL = self.baseUrl.appendingPathComponent(api)
+        let apiURL:URL = self.baseUrl.appendingPathComponent(api)
         var request:URLRequest
         if method == .get {
             var apiURLComponent = URLComponents(url: apiURL, resolvingAgainstBaseURL: true)!
@@ -195,9 +195,19 @@ extension IPaURLResourceUI :URLSessionDelegate
     }
     
     public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-       
+        let authMethod = challenge.protectionSpace.authenticationMethod
+        guard authMethod == NSURLAuthenticationMethodHTTPBasic else {
+            completionHandler(.performDefaultHandling, nil)
+            return
+        }
+        if let delegate = delegate {
         
-        self.delegate?.handleChallenge(challenge, completionHandler: completionHandler)
+            delegate.handleChallenge(challenge, completionHandler: completionHandler)
+        }
+        else {
+            
+            completionHandler(.cancelAuthenticationChallenge, nil)
+        }
     }
 }
 
