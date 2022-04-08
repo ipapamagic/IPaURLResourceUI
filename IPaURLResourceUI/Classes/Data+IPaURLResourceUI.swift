@@ -70,7 +70,7 @@ extension Data {
         }
         return section.jsonObject
     }
-    public func decodeJson<T:Codable>(_ type:T) throws -> T {
+    public func decodeJson<T>() throws -> T? where T : Codable {
         let jsonDecoder = JSONDecoder()
         return try jsonDecoder.decode(T.self, from: self)
     }
