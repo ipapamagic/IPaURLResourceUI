@@ -38,10 +38,11 @@ open class IPaURLResourceUI : NSObject {
         return session
     }()
     
-    public init(with baseUrl:URL,delegate:IPaURLResourceUIDelegate? = nil) {
+    public init(with baseUrl:URL,urlSessionConfiguration:URLSessionConfiguration = URLSessionConfiguration.default,delegate:IPaURLResourceUIDelegate? = nil) {
         super.init()
         self.baseUrl = baseUrl
         self.delegate = delegate
+        self.urlSession = URLSession(configuration: urlSessionConfiguration, delegate: self, delegateQueue: OperationQueue.main)
     }
     @inlinable open func generateQueryUrl(_ apiURL:URL,params:[String:Any]?)->URL {
         var apiURLComponent = URLComponents(url: apiURL, resolvingAgainstBaseURL: true)!
