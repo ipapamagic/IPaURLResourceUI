@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPaURLResourceUI'
-  s.version          = '5.3'
+  s.version          = '5.4.0'
   s.summary          = 'A short description of IPaURLResourceUI.'
   s.swift_version    = '5.3'
   s.ios.deployment_target = '11.0'
@@ -30,7 +30,7 @@ TODO: Add long description of the pod here.
   s.source           = { :git => 'https://github.com/ipapamagic/IPaURLResourceUI.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.source_files = 'IPaURLResourceUI/Classes/**/*'
+  s.source_files = 'Sources/IPaURLResourceUI/**/*'
   
   # s.resource_bundles = {
   #   'IPaURLResourceUI' => ['IPaURLResourceUI/Assets/*.png']
@@ -41,9 +41,9 @@ TODO: Add long description of the pod here.
   # s.dependency 'AFNetworking', '~> 2.3'
 
 
-    s.dependency 'IPaLog'
+    s.dependency 'IPaLog' ,'~> 3.1.0'
     
-    s.dependency 'IPaXMLSection' , '~> 2.1'
+    s.dependency 'IPaXMLSection' , '~> 2.2.0'
   
 
 end

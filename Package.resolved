@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "ipaxmlsection",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ipapamagic/IPaXMLSection.git",
+      "state" : {
+        "revision" : "b43fbdb26e55a68f48e33d5806344e37040fddef",
+        "version" : "2.2.0"
+      }
+    }
+  ],
+  "version" : 2
+}
