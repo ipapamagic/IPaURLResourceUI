@@ -8,6 +8,7 @@
 
 import Foundation
 import MobileCoreServices
+import UniformTypeIdentifiers
 
 public struct IPaMultipartFile {
     public var name:String
@@ -74,9 +75,9 @@ public struct IPaMultipartFile {
         let url = URL(fileURLWithPath: path)
         let pathExtension = url.pathExtension
         self.mime = "application/octet-stream"
-        if let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, pathExtension as NSString, nil)?.takeRetainedValue() {
-            if let mimetype = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType)?.takeRetainedValue() {
-                self.mime = mimetype as String
+        if let type = UTType(filenameExtension:pathExtension) {
+            if let mimetype = type.preferredMIMEType {
+                self.mime = mimetype
             }
         }
         self.fileName = (path as NSString).lastPathComponent
