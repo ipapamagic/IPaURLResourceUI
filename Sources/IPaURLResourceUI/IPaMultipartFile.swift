@@ -71,6 +71,7 @@ public struct IPaMultipartFile {
         self.fileName = fileName
         self.file = fileData
     }
+    @available(iOS 14.0, *)
     public init(_ name:String,path:String) {
         let url = URL(fileURLWithPath: path)
         let pathExtension = url.pathExtension
