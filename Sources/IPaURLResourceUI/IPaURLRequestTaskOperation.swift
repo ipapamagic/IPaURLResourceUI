@@ -12,14 +12,10 @@ public typealias IPaURLRequestOperationCompletion = ((Data?,URLResponse?,Error?)
 public class IPaURLRequestTaskOperation: Operation {
     var urlSession:URLSession
     var _request:URLRequest
-    @objc dynamic var _task:URLSessionTask?
-    
     public var request:URLRequest {
         return _request
     }
-    public var task:URLSessionTask? {
-        return _task
-    }
+    @objc dynamic public private(set) var task:URLSessionTask?
     @objc dynamic public var progress:Double {
         return self.task?.progress.fractionCompleted ?? 0
     }
@@ -29,26 +25,18 @@ public class IPaURLRequestTaskOperation: Operation {
         self._request = request
         self.requestCompleteBlock = complete
     }
-    @objc class public override func keyPathsForValuesAffectingValue(forKey key: String) -> Set<String> {
-        if key == "progress" {
-            return Set(arrayLiteral: "_task","_task.progress.fractionCompleted")
-        }
-        return super.keyPathsForValuesAffectingValue(forKey: key)
+    @objc class public func keyPathsForValuesAffectingProgress() -> Set<String> {
+       return Set(arrayLiteral: "task","task.progress.fractionCompleted")
     }
+    
     override public var isExecuting:Bool {
         get {
-            guard let task = _task else {
-                return false
-            }
-            return task.state == URLSessionTask.State.running
+            return task?.state == URLSessionTask.State.running
         }
     }
     override public var isFinished:Bool {
         get {
-            guard let task = _task else {
-                return false
-            }
-            let isFinished = (task.state == URLSessionTask.State.completed) && (self.requestCompleteBlock == nil)
+            let isFinished = (task?.state == URLSessionTask.State.completed) && (self.requestCompleteBlock == nil)
             return isFinished
         }
     }
@@ -59,10 +47,7 @@ public class IPaURLRequestTaskOperation: Operation {
     }
     override public var isCancelled: Bool {
         get {
-            guard let task = _task else {
-                return false
-            }
-            return task.state == URLSessionTask.State.canceling
+            return task?.state == URLSessionTask.State.canceling
         }
     }
     override public func start() {
@@ -82,11 +67,11 @@ public class IPaURLRequestTaskOperation: Operation {
             self.didChangeValue(forKey: "isFinished")
             
         }
-        self._task = task
+        self.task = task
         task.resume()
     }
     override public func cancel() {
-        self._task?.cancel()
+        self.task?.cancel()
     }
     func createTask(_ complete:@escaping (Data?,URLResponse?,Error?)->()) -> URLSessionTask {
         fatalError("do not use IPaURLRequestOperation directly!")
