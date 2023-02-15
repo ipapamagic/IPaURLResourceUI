@@ -93,6 +93,13 @@ open class IPaURLResourceUI : NSObject {
         }
         return request
     }
+    @inlinable public func apiData(with request:URLRequest) async -> IPaURLResourceUIResult {
+        return await withCheckedContinuation({ continuation in
+            self.apiData(with: request) { result in
+                continuation.resume(returning: result)
+            }
+        })
+    }
     @discardableResult
     open func apiData(with request:URLRequest,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestDataTaskOperation {
         let operation = self.apiDataOperation(with: request, complete: complete)
@@ -107,12 +114,30 @@ open class IPaURLResourceUI : NSObject {
         })
         return operation
     }
+    @inlinable public func apiData(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]? = nil) async -> IPaURLResourceUIResult {
+        return await withCheckedContinuation({ continuation in
+            self.apiData(api,method: method,headerFields: headerFields,params: params) { result in
+                continuation.resume(returning: result)
+            }
+        })
+    }
     
     @discardableResult
     @inlinable
     open func apiData(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]? = nil,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestDataTaskOperation {
         let request = self.generateURLRequest(api, method: method, headerFields: headerFields, params: params)
         return self.apiData(with: request, complete: complete)
+    }
+    @inlinable public func apiUpload(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,json:Any) async throws -> IPaURLResourceUIResult {
+        return try await withCheckedThrowingContinuation({ continuation in
+            do {
+                try self.apiUpload(api, method: method, headerFields: headerFields, json: json) { result in
+                    continuation.resume(returning: result)
+                }
+            }catch (let error) {
+                continuation.resume(throwing: error)
+            }
+        })
     }
     @discardableResult
     open func apiUpload(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,json:Any,complete:@escaping IPaURLResourceUIResultHandler) throws -> IPaURLRequestTaskOperation {
@@ -136,6 +161,13 @@ open class IPaURLResourceUI : NSObject {
         
         return operation
     }
+    @inlinable public func apiUpload(_ api:String,method:HttpMethod,headerFields:[String:String]?,fileUrl:URL) async -> IPaURLResourceUIResult {
+        return await withCheckedContinuation({ continuation in
+            self.apiUpload(api, method: method, headerFields: headerFields,fileUrl: fileUrl) { result in
+                return continuation.resume(returning: result)
+            }
+        })
+    }
     @discardableResult
     open func apiUpload(_ api:String,method:HttpMethod,headerFields:[String:String]?,fileUrl:URL,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestUploadTaskOperation {
         let operation = apiUploadOperation(api, method: method,headerFields: headerFields,file: fileUrl,complete:complete)
@@ -148,6 +180,14 @@ open class IPaURLResourceUI : NSObject {
         self.operationQueue.addOperation(operation)
         return operation
     }
+    @inlinable open func apiFormDataUpload(_ api:String,method:HttpMethod,headerFields:[String:String]?,params:[String:Any],file:IPaMultipartFile) async -> IPaURLResourceUIResult  {
+        return await withCheckedContinuation({ continuation in
+            self.apiFormDataUpload(api, method: method, headerFields: headerFields,params: params,file:file) {
+                result in
+                continuation.resume(returning: result)
+            }
+        })
+    }
     
     @discardableResult
     open func apiFormDataUpload(_ api:String,method:HttpMethod,headerFields:[String:String]?,params:[String:Any],file:IPaMultipartFile,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestFormDataUploadTaskOperation {
@@ -158,6 +198,14 @@ open class IPaURLResourceUI : NSObject {
     @inlinable
     open func apiFormDataUploadOperation(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]? = nil,file:IPaMultipartFile,complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestFormDataUploadTaskOperation {
         return self.apiFormDataUploadOperation(api, method: method, headerFields: headerFields, params: params, files: [file], complete: complete)
+    }
+    @inlinable public func apiFormDataUpload(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]? = nil,files:[IPaMultipartFile]) async -> IPaURLResourceUIResult {
+        return await withCheckedContinuation({ continuation in
+            self.apiFormDataUpload(api, method: method, headerFields: headerFields,params: params,files:files) {
+                result in
+                continuation.resume(returning: result)
+            }
+        })
     }
     @discardableResult
     open func apiFormDataUpload(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,params:[String:Any]? = nil,files:[IPaMultipartFile],complete:@escaping IPaURLResourceUIResultHandler) -> IPaURLRequestFormDataUploadTaskOperation {
