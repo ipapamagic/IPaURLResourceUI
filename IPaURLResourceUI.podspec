@@ -8,9 +8,9 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPaURLResourceUI'
-  s.version          = '5.4.0'
+  s.version          = '6.0.0'
   s.summary          = 'A short description of IPaURLResourceUI.'
-  s.swift_version    = '5.3'
+  s.swift_version    = '6.0'
   s.ios.deployment_target = '11.0'
   s.watchos.deployment_target = '6.0'
 # This description is used to generate tags and improve search results.

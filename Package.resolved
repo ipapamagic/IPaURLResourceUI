@@ -5,7 +5,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ipapamagic/IPaLog.git",
       "state" : {
-        "revision" : "f743fdc25bd1247139ebb9f9d800230786f6000b",
+        "revision" : "69938bb622a5d6dea1fb1641a29e337281a1dbf5",
         "version" : "3.1.0"
       }
     },
@@ -14,7 +14,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ipapamagic/IPaXMLSection.git",
       "state" : {
-        "revision" : "b43fbdb26e55a68f48e33d5806344e37040fddef",
+        "revision" : "da9af06cfa445ac91250dbc8adef276438ba4e9e",
         "version" : "2.2.0"
       }
     }

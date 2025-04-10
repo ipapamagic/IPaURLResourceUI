@@ -8,8 +8,8 @@
 import Foundation
 import IPaLog
 import Combine
-public typealias IPaURLRequestOperationCompletion = ((Data?,URLResponse?,Error?)->())
-public class IPaURLRequestTaskOperation: Operation {
+public typealias IPaURLRequestOperationCompletion =  (@Sendable (Data?,URLResponse?,Error?)->())
+@objc public class IPaURLRequestTaskOperation: Operation ,@unchecked Sendable {
     var urlSession:URLSession
     var _request:URLRequest
     public var request:URLRequest {
@@ -34,7 +34,7 @@ public class IPaURLRequestTaskOperation: Operation {
             return task?.state == URLSessionTask.State.running
         }
     }
-    override public var isFinished:Bool {
+    @objc override public var isFinished:Bool {
         get {
             let isFinished = (task?.state == URLSessionTask.State.completed) && (self.requestCompleteBlock == nil)
             return isFinished
@@ -73,19 +73,19 @@ public class IPaURLRequestTaskOperation: Operation {
     override public func cancel() {
         self.task?.cancel()
     }
-    func createTask(_ complete:@escaping (Data?,URLResponse?,Error?)->()) -> URLSessionTask {
+    func createTask(_ complete:@escaping @Sendable (Data?,URLResponse?,Error?)->()) -> URLSessionTask {
         fatalError("do not use IPaURLRequestOperation directly!")
     }
    
 }
-public class IPaURLRequestDataTaskOperation :IPaURLRequestTaskOperation {
-    public override func createTask(_ complete:@escaping IPaURLRequestOperationCompletion) -> URLSessionTask {
+public class IPaURLRequestDataTaskOperation :IPaURLRequestTaskOperation,@unchecked Sendable {
+    public override func createTask(_ complete:@escaping @Sendable IPaURLRequestOperationCompletion) -> URLSessionTask {
         
         urlSession.dataTask(with: request, completionHandler: complete)
         
     }
 }
-public class IPaURLRequestFormDataUploadTaskOperation:IPaURLRequestTaskOperation, IPaURLFormDataStreamWriter {
+public class IPaURLRequestFormDataUploadTaskOperation:IPaURLRequestTaskOperation, IPaURLFormDataStreamWriter ,@unchecked Sendable  {
     var outputStream: OutputStream?
     var params:[String:Any]
     var files:[IPaMultipartFile]
@@ -99,7 +99,7 @@ public class IPaURLRequestFormDataUploadTaskOperation:IPaURLRequestTaskOperation
     override func executeOperation() {
         self.createOutputStream()
     }
-    public override func createTask(_ complete: @escaping (Data?, URLResponse?, Error?) -> ()) -> URLSessionTask {
+    public override func createTask(_ complete: @escaping @Sendable(Data?, URLResponse?, Error?) -> ()) -> URLSessionTask {
         
         let fileUrl = URL(fileURLWithPath: self.tempFilePath)
         return self.urlSession.uploadTask(with: request, fromFile: fileUrl) { data, response, error in
@@ -114,27 +114,30 @@ public class IPaURLRequestFormDataUploadTaskOperation:IPaURLRequestTaskOperation
     }
     
 }
-public class IPaURLRequestUploadTaskOperation:IPaURLRequestTaskOperation {
-    var file:Any
-    init(urlSession: URLSession, request: URLRequest, file:Any, complete: @escaping IPaURLRequestOperationCompletion) {
-        self.file = file
+public class IPaURLRequestUploadFileTaskOperation:IPaURLRequestTaskOperation,@unchecked Sendable  {
+    var fileUrl:URL
+    init(urlSession: URLSession, request: URLRequest, fileUrl:URL, complete: @escaping IPaURLRequestOperationCompletion) {
+        self.fileUrl = fileUrl
         super.init(urlSession: urlSession, request: request, complete: complete)
         
     }
-    public override func createTask(_ complete: @escaping (Data?, URLResponse?, Error?) -> ()) -> URLSessionTask {
-        switch file {
-        case let fileUrl as URL:
-            return self.urlSession.uploadTask(with: self._request, fromFile: fileUrl,completionHandler: complete)
-        case let fileData as Data:
-            return self.urlSession.uploadTask(with: self._request, from: fileData, completionHandler: complete)
-        default:
-            break
-        }
-        fatalError("IPaURLRequestUploadOperation: unknow file type!")
+    public override func createTask(_ complete: @escaping @Sendable(Data?, URLResponse?, Error?) -> ()) -> URLSessionTask {
+        return self.urlSession.uploadTask(with: self._request, fromFile: fileUrl,completionHandler: complete)
+    }
+}
+public class IPaURLRequestUploadDataTaskOperation:IPaURLRequestTaskOperation,@unchecked Sendable  {
+    var data:Data
+    init(urlSession: URLSession, request: URLRequest, data:Data, complete: @escaping IPaURLRequestOperationCompletion) {
+        self.data = data
+        super.init(urlSession: urlSession, request: request, complete: complete)
+        
+    }
+    public override func createTask(_ complete: @escaping @Sendable(Data?, URLResponse?, Error?) -> ()) -> URLSessionTask {
+        return self.urlSession.uploadTask(with: self._request, from: data, completionHandler: complete)
     }
 }
 @available(iOS 13.0, *)
-public class IPaURLRequestPublisherOperation<T>:Operation {
+public class IPaURLRequestPublisherOperation<T>:Operation,@unchecked Sendable  {
     var urlSession:URLSession
     var _request:URLRequest
     var anyCancellable:AnyCancellable? = nil
@@ -196,7 +199,7 @@ public class IPaURLRequestPublisherOperation<T>:Operation {
     }
 }
 @available(iOS 13.0, *)
-public class IPaURLRequestFormDataPublisherOperation<T>:IPaURLRequestPublisherOperation<T>,IPaURLFormDataStreamWriter {
+public class IPaURLRequestFormDataPublisherOperation<T>:IPaURLRequestPublisherOperation<T>,IPaURLFormDataStreamWriter,@unchecked Sendable  {
     var outputStream:OutputStream?
     var files:[IPaMultipartFile]
     lazy var tempFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent("IPaURLResponseUITemp\(UUID().uuidString)")
