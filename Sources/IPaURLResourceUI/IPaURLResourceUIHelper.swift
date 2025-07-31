@@ -17,6 +17,14 @@ extension IPaURLResourceUIResult {
             throw error
         }
     }
+    public func getResponse() throws -> URLResponse? {
+        switch self {
+        case .success(let (response,_)):
+            return response
+        case .failure(let error):
+            throw error
+        }
+    }
     public func jsonData<T>() -> T? {
         (try? self.getResponseData())?.jsonData as? T
     }
