@@ -116,7 +116,7 @@ public protocol IPaURLResourceUIDelegate {
     
     @inlinable public func apiData(_ api:String,method:HttpMethod,headerFields:[String:String]? = nil,queries:[String:Any]? = nil,params:[String:Any]? = nil) async -> IPaURLResourceUIResult {
         return await withCheckedContinuation({ continuation in
-            self.apiData(api,method: method,headerFields: headerFields,params: params) { result in
+            self.apiData(api,method: method,headerFields: headerFields,queries: queries,params: params) { result in
                 continuation.resume(returning: result)
             }
         })
